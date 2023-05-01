@@ -1,6 +1,6 @@
 package tunght.gr2.security;
 
-import tunght.gr2.domain.user.repository.UserRepository;
+import tunght.gr2.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
