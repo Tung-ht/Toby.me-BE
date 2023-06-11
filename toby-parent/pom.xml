@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.4</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+    <groupId>tunght.toby</groupId>
+    <artifactId>toby-parent</artifactId>
+    <version>1.0.0</version>
+    <name>toby-parent</name>
+    <packaging>pom</packaging>
+    <description>parent pom of my whole project, declare versions of all dependencies</description>
+    <properties>
+        <springboot.version>2.7.4</springboot.version>
+        <java.version>11</java.version>
+        <maven.compiler.version>3.8.0</maven.compiler.version>
+        <sonarqube.version>3.4.0.905</sonarqube.version>
+        <openapi.version>1.6.13</openapi.version>
+        <lombok.version>1.18.22</lombok.version>
+        <mysql.version>8.0.32</mysql.version>
+        <jjwt.version>0.11.4</jjwt.version>
+        <mapstruct.version>1.4.2.Final</mapstruct.version>
+        <redis.version>3.0.5</redis.version>
+    </properties>
+</project>

@@ -1,0 +1,5 @@
+toby:
+  auth:
+    token:
+      sign-key: will_be_filled_in_other_modules
+      valid-time: will_be_filled_in_other_modules
