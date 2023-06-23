@@ -1,6 +1,7 @@
 package tunght.toby.be.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,6 +13,9 @@ import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.security.AuthUserDetails;
 import tunght.toby.common.security.JwtUtils;
+import tunght.toby.common.utils.JsonConverter;
+
+import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +23,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
+    private final RedisTemplate<String, AuthUserDetails> redisTemplateTokenUser;
 
     @Override
     public UserDto registration(final UserDto.Registration registration) {
@@ -32,6 +37,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto login(UserDto.Login login) {
         UserEntity userEntity = userRepository.findByEmail(login.getEmail()).filter(user -> passwordEncoder.matches(login.getPassword(), user.getPassword())).orElseThrow(() -> new AppException(Error.LOGIN_INFO_INVALID));
+        String jwt = jwtUtils.encode(userEntity.getEmail());
+        var userDetail = AuthUserDetails.builder()
+                .id(userEntity.getId())
+                .email(userEntity.getEmail())
+                .authorities(userEntity.getRoles())
+                .build();
+        redisTemplateTokenUser.opsForValue().set(jwt, userDetail, Duration.ofSeconds(jwtUtils.getValidSeconds()));
         return convertEntityToDto(userEntity);
     }
 

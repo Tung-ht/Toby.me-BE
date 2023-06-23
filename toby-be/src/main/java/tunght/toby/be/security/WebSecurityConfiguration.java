@@ -48,7 +48,7 @@ public class WebSecurityConfiguration {
                 .antMatchers(generalEndpoints).permitAll()
                 .antMatchers(HttpMethod.GET, "/articles/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/profiles/**").permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
                 .and()
                 .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 .and()

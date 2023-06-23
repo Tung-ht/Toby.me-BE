@@ -5,6 +5,7 @@ import tunght.toby.common.entity.BaseEntity;
 import tunght.toby.common.entity.UserEntity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Getter
 @Setter

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import tunght.toby.common.entity.BaseEntity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Getter
 @Builder

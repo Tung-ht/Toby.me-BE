@@ -8,6 +8,7 @@ import tunght.toby.common.entity.BaseEntity;
 import tunght.toby.common.entity.UserEntity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 

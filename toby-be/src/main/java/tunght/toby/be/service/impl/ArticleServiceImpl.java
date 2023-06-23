@@ -40,7 +40,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     @Override
     public ArticleDto createArticle(ArticleDto article, AuthUserDetails authUserDetails) {
-        String slug = String.join("-", article.getTitle().split(" ")) + "-" + LocalDateTime.now();
+        String slug = String.join("-", article.getTitle().split(" ")) + "-" + System.currentTimeMillis();
         UserEntity author = UserEntity.builder()
                 .id(authUserDetails.getId())
                 .build();

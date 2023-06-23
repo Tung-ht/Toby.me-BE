@@ -23,7 +23,6 @@ public class JWTAuthFilter extends GenericFilter {
                 .filter(authHeader -> authHeader.startsWith(TOKEN_PREFIX))
                 .map(authHeader -> authHeader.substring(TOKEN_PREFIX.length()))
                 .filter(jwtUtils::validateToken)
-                .map(jwtUtils::getSub)
                 .map(authenticationProvider::getAuthentication)
                 .ifPresent(SecurityContextHolder.getContext()::setAuthentication);
         chain.doFilter(request, response);
