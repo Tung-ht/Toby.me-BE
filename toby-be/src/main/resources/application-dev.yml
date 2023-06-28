@@ -1,5 +1,18 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/db_name
+    url: jdbc:mysql://ip_address:3306/db_name
     username: your_username
     password: your_password
+  redis:
+    database: 0
+    password: your_password
+    host: ip_address
+    port: 6379
+    timeout: 60000
+
+mail-sender:
+  host: smtp.gmail.com
+  port: 587
+  email: yourmail@gmail.com
+  password: your_password
+

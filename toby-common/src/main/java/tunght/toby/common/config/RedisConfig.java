@@ -13,6 +13,7 @@ public class RedisConfig {
     @Autowired
     RedisConnectionFactory factory;
 
+    // just an example, I'm not using it in this project
     @Bean
     public RedisTemplate<String, AuthUserDetails> redisTemplateTokenUser() {
         var template = new RedisTemplate<String, AuthUserDetails>();

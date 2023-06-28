@@ -1,5 +1,5 @@
 server:
-  port: 8888
+  port: 8889
   servlet:
     context-path: /api
 
@@ -20,7 +20,9 @@ spring:
 logging:
   file:
     name: logs/toby-be
-    max-size: 10MB
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
   pattern:
     file: "%d [%t] %-5level %logger{36} - %msg%n"
 #    console:
@@ -34,5 +36,6 @@ toby:
   auth:
     token:
       sign-key: signKey012345678901234567890123456789
-      valid-time: 30000
-# seconds
+      valid-time: 3600
+  otp:
+    valid-time: 180

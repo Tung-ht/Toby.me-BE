@@ -33,8 +33,9 @@ public class WebSecurityConfiguration {
             "/v3/api-docs/**",
             "/swagger-ui/**",
             "/swagger-ui.html",
+            "/images/**",
             "/users/**",
-            "/tags/**"
+            "/tags/**",
     };
 
     @Bean

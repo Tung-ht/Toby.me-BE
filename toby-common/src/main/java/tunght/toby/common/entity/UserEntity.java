@@ -4,10 +4,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tunght.toby.common.enums.EStatus;
 
 import javax.persistence.*;
-import java.io.Serializable;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -16,9 +15,9 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 public class UserEntity extends BaseEntity {
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String username;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
     @Column(nullable = false)
     private String password;
@@ -26,6 +25,11 @@ public class UserEntity extends BaseEntity {
     private String bio;
     @Column
     private String image;
+    @Column
+    private String otp;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private EStatus status;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "users_roles_nn",
@@ -34,7 +38,7 @@ public class UserEntity extends BaseEntity {
     private Set<RoleEntity> roles;
 
     @Builder
-    public UserEntity(Long id, String username, String email, String password, String bio, String image, Set<RoleEntity> roles) {
+    public UserEntity(Long id, String username, String email, String password, String bio, String image, Set<RoleEntity> roles, EStatus status) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -42,5 +46,6 @@ public class UserEntity extends BaseEntity {
         this.bio = bio;
         this.image = image;
         this.roles = roles;
+        this.status = status;
     }
 }

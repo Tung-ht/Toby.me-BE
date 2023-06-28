@@ -1,12 +1,10 @@
 package tunght.toby.be.controller;
 
+import org.springframework.web.bind.annotation.*;
+import tunght.toby.be.consts.EUserAction;
 import tunght.toby.be.dto.UserDto;
 import tunght.toby.be.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
@@ -17,12 +15,22 @@ public class UsersController {
     private final UserService userService;
 
     @PostMapping
-    public UserDto registration(@RequestBody @Valid UserDto.Registration registration) {
+    public UserDto.RegistrationResponse registration(@Valid @RequestBody UserDto.Registration registration) {
         return userService.registration(registration);
     }
 
     @PostMapping("/login")
-    public UserDto login(@RequestBody UserDto.Login login) {
+    public UserDto login(@Valid @RequestBody UserDto.Login login) {
         return userService.login(login);
+    }
+
+    @PostMapping("/registration/verify")
+    public void registrationVerify(@RequestBody UserDto.RegistrationOTP registrationOTP) {
+        userService.registrationVerify(registrationOTP);
+    }
+
+    @PostMapping("/resend-otp")
+    public void resendOTP(@RequestParam(value = "action") EUserAction action, @RequestParam(value = "email") String email) {
+        userService.resendOTP(action, email);
     }
 }

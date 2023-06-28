@@ -109,6 +109,9 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(readOnly = true)
     @Override
     public List<ArticleDto> feedArticles(AuthUserDetails authUserDetails, FeedParams feedParams) {
+        if (authUserDetails == null) {
+            return null;
+        }
         List<Long> feedAuthorIds = followRepository.findByFollowerId(authUserDetails.getId()).stream().map(FollowEntity::getFollowee).map(BaseEntity::getId).collect(Collectors.toList());
         return articleRepository.findByAuthorIdInOrderByCreatedAtDesc(feedAuthorIds, PageRequest.of(feedParams.getOffset(), feedParams.getLimit())).stream().map(entity -> {
             List<FavoriteEntity> favorites = entity.getFavoriteList();

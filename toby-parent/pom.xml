@@ -27,5 +27,6 @@
         <redis.version>3.0.5</redis.version>
 <!--        <redis.version>2.7.10</redis.version>-->
         <gson.version>2.10.1</gson.version>
+        <thymeleaf.version>3.0.11.RELEASE</thymeleaf.version>
     </properties>
 </project>

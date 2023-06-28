@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,8 +22,8 @@ public class AppExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorMessages> handleValidationError(MethodArgumentNotValidException exception) {
-        log.error("Exception: ", exception);
         List<String> messages = exception.getBindingResult().getFieldErrors().stream().map(this::createFieldErrorMessage).collect(Collectors.toList());
+        log.error("Exception: {}", messages);
         return responseErrorMessages(messages, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 

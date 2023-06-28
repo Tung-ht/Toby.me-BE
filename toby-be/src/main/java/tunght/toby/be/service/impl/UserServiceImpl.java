@@ -5,10 +5,13 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tunght.toby.be.consts.EUserAction;
 import tunght.toby.be.dto.UserDto;
 import tunght.toby.be.repository.UserRepository;
 import tunght.toby.be.service.UserService;
+import tunght.toby.be.utils.MailSender;
 import tunght.toby.common.entity.UserEntity;
+import tunght.toby.common.enums.EStatus;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.security.AuthUserDetails;
@@ -23,27 +26,39 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
-    private final RedisTemplate<String, AuthUserDetails> redisTemplateTokenUser;
+    private final RedisTemplate<String, String> redisTemplate;
+    private final MailSender mailSender;
 
     @Override
-    public UserDto registration(final UserDto.Registration registration) {
-        userRepository.findByUsernameOrEmail(registration.getUsername(), registration.getEmail()).stream().findAny().ifPresent(entity -> {throw new AppException(Error.DUPLICATED_USER);});
-        UserEntity userEntity = UserEntity.builder().username(registration.getUsername()).email(registration.getEmail()).password(passwordEncoder.encode(registration.getPassword())).bio("").build();
-        userRepository.save(userEntity);
-        return convertEntityToDto(userEntity);
+    public UserDto.RegistrationResponse registration(UserDto.Registration registration) {
+        userRepository.findAllByEmailAndStatus(registration.getEmail(), EStatus.ACTIVE).stream().findAny().ifPresent(entity -> {throw new AppException(Error.DUPLICATED_USER);});
+        userRepository.findAllByUsernameAndStatus(registration.getUsername(), EStatus.ACTIVE).stream().findAny().ifPresent(entity -> {throw new AppException(Error.DUPLICATED_USER);});
+        UserEntity userEntity = UserEntity.builder()
+                .username(registration.getUsername())
+                .email(registration.getEmail())
+                .password(passwordEncoder.encode(registration.getPassword()))
+                .bio("")
+                .status(EStatus.INACTIVE)
+                .build();
+        userEntity = userRepository.save(userEntity);
+        mailSender.sendMail(userEntity.getEmail(), EUserAction.VERIFY_EMAIL);
+        return UserDto.RegistrationResponse.builder().email(userEntity.getEmail()).build();
     }
 
     @Transactional(readOnly = true)
     @Override
     public UserDto login(UserDto.Login login) {
-        UserEntity userEntity = userRepository.findByEmail(login.getEmail()).filter(user -> passwordEncoder.matches(login.getPassword(), user.getPassword())).orElseThrow(() -> new AppException(Error.LOGIN_INFO_INVALID));
+        UserEntity userEntity = userRepository.findByEmailAndStatus(login.getEmail(), EStatus.ACTIVE).filter(user -> passwordEncoder.matches(login.getPassword(), user.getPassword())).orElseThrow(() -> new AppException(Error.LOGIN_INFO_INVALID));
         String jwt = jwtUtils.encode(userEntity.getEmail());
         var userDetail = AuthUserDetails.builder()
                 .id(userEntity.getId())
                 .email(userEntity.getEmail())
                 .authorities(userEntity.getRoles())
                 .build();
-        redisTemplateTokenUser.opsForValue().set(jwt, userDetail, Duration.ofSeconds(jwtUtils.getValidSeconds()));
+        // when an user logged in, (jwt-userInfo)-(string-jsonString) is cached into redis
+        var jsonStr = JsonConverter.serializeObject(userDetail);
+        redisTemplate.opsForValue()
+                .set(jwt, jsonStr, Duration.ofSeconds(jwtUtils.getValidSeconds()));
         return convertEntityToDto(userEntity);
     }
 
@@ -69,13 +84,6 @@ public class UserServiceImpl implements UserService {
             userEntity.setUsername(update.getUsername());
         }
 
-        if (update.getEmail() != null) {
-            userRepository.findByEmail(update.getEmail())
-                    .filter(found -> !found.getId().equals(userEntity.getId()))
-                    .ifPresent(found -> {throw new AppException(Error.DUPLICATED_USER);});
-            userEntity.setEmail(update.getEmail());
-        }
-
         if (update.getPassword() != null) {
             userEntity.setPassword(passwordEncoder.encode(update.getPassword()));
         }
@@ -90,5 +98,27 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(userEntity);
         return convertEntityToDto(userEntity);
+    }
+
+    @Override
+    public void registrationVerify(UserDto.RegistrationOTP registrationOTP) {
+        var user = userRepository.findLastestCreatedAccountByMail(registrationOTP.getEmail())
+                .orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
+        var otp = user.getOtp();
+        if (otp == null || !otp.equals(registrationOTP.getOtp())) {
+            throw new AppException(Error.OTP_INVALID);
+        } else {
+            user.setStatus(EStatus.ACTIVE);
+            userRepository.save(user);
+        }
+    }
+
+    @Override
+    public void resendOTP(EUserAction action, String email) {
+        var users = userRepository.findByEmail(email);
+        if (users.isEmpty()) {
+            throw new AppException(Error.USER_NOT_FOUND);
+        }
+        mailSender.sendMail(email, action);
     }
 }
