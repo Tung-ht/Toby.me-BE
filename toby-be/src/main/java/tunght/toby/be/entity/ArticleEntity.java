@@ -31,6 +31,9 @@ public class ArticleEntity extends BaseEntity {
     @Column(nullable = false)
     private String body;
 
+    @Column(nullable = false)
+    private Integer isApproved;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private UserEntity author;

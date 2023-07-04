@@ -1,5 +1,6 @@
 package tunght.toby.be.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.*;
 import tunght.toby.be.consts.EUserAction;
 import tunght.toby.be.dto.UserDto;
@@ -19,8 +20,9 @@ public class UsersController {
         return userService.registration(registration);
     }
 
+    @Operation(summary = "api login, return access_token")
     @PostMapping("/login")
-    public UserDto login(@Valid @RequestBody UserDto.Login login) {
+    public String login(@Valid @RequestBody UserDto.Login login) {
         return userService.login(login);
     }
 

@@ -11,13 +11,13 @@ import tunght.toby.be.dto.model.ArticleQueryParam;
 import tunght.toby.be.dto.model.FeedParams;
 import tunght.toby.be.entity.*;
 import tunght.toby.be.repository.ArticleRepository;
-import tunght.toby.be.repository.CommentRepository;
 import tunght.toby.be.repository.FavoriteRepository;
 import tunght.toby.be.repository.FollowRepository;
 import tunght.toby.be.service.ArticleService;
 import tunght.toby.be.service.ProfileService;
 import tunght.toby.common.entity.BaseEntity;
 import tunght.toby.common.entity.UserEntity;
+import tunght.toby.common.enums.ERole;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.security.AuthUserDetails;
@@ -33,7 +33,6 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleRepository articleRepository;
     private final FollowRepository followRepository;
     private final FavoriteRepository favoriteRepository;
-    private final CommentRepository commentRepository;
 
     private final ProfileService profileService;
 
@@ -94,6 +93,14 @@ public class ArticleServiceImpl implements ArticleService {
             found.setBody(article.getBody());
         }
 
+        if (article.getTagList() != null) {
+            var tagList = found.getTagList();
+            tagList.clear();
+            for (String tag : article.getTagList()) {
+                tagList.add(ArticleTagRelationEntity.builder().article(found).tag(tag).build());
+            }
+        }
+
         articleRepository.save(found);
 
         return getArticle(found.getSlug(), authUserDetails);
@@ -102,18 +109,26 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     @Override
     public void deleteArticle(String slug, AuthUserDetails authUserDetails) {
-        ArticleEntity found = articleRepository.findBySlug(slug).filter(entity -> entity.getAuthor().getId().equals(authUserDetails.getId())).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
-        articleRepository.delete(found);
+        var isAdmin = authUserDetails.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals(ERole.ROLE_ADMIN.name()));
+
+        ArticleEntity found = articleRepository.findBySlug(slug)
+                .orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
+        var isAuthor = found.getAuthor().getId().equals(authUserDetails.getId());
+
+        if (isAdmin || isAuthor) {
+            articleRepository.delete(found);
+        }
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<ArticleDto> feedArticles(AuthUserDetails authUserDetails, FeedParams feedParams) {
         if (authUserDetails == null) {
-            return null;
+            return new ArrayList<>();
         }
         List<Long> feedAuthorIds = followRepository.findByFollowerId(authUserDetails.getId()).stream().map(FollowEntity::getFollowee).map(BaseEntity::getId).collect(Collectors.toList());
-        return articleRepository.findByAuthorIdInOrderByCreatedAtDesc(feedAuthorIds, PageRequest.of(feedParams.getOffset(), feedParams.getLimit())).stream().map(entity -> {
+        return articleRepository.findByAuthorIdInOrderByCreatedAtDesc(feedAuthorIds, 1, PageRequest.of(feedParams.getOffset(), feedParams.getLimit())).stream().map(entity -> {
             List<FavoriteEntity> favorites = entity.getFavoriteList();
             Boolean favorited = favorites.stream().anyMatch(favoriteEntity -> favoriteEntity.getUser().getId().equals(authUserDetails.getId()));
             int favoriteCount = favorites.size();
@@ -155,24 +170,31 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ArticleDto> listArticle(ArticleQueryParam articleQueryParam, AuthUserDetails authUserDetails) {
+    public List<ArticleDto> listArticle(ArticleQueryParam articleQueryParam, Integer isApproved, AuthUserDetails authUserDetails) {
         Pageable pageable = null;
-        if (articleQueryParam.getOffset() != null) {
+        if (articleQueryParam.getOffset() != null && articleQueryParam.getLimit() != null) {
             pageable = PageRequest.of(articleQueryParam.getOffset(), articleQueryParam.getLimit());
         }
 
         List<ArticleEntity> articleEntities;
         if (articleQueryParam.getTag() != null) {
-            articleEntities = articleRepository.findByTag(articleQueryParam.getTag(), pageable);
+            articleEntities = articleRepository.findByTag(articleQueryParam.getTag(), isApproved, pageable);
         } else if (articleQueryParam.getAuthor() != null) {
-            articleEntities = articleRepository.findByAuthorName(articleQueryParam.getAuthor(), pageable);
+            articleEntities = articleRepository.findByAuthorName(articleQueryParam.getAuthor(), isApproved, pageable);
         } else if (articleQueryParam.getFavorited() != null) {
             articleEntities = articleRepository.findByFavoritedUsername(articleQueryParam.getFavorited(), pageable);
         } else {
-            articleEntities = articleRepository.findListByPaging(pageable);
+            articleEntities = articleRepository.findListByPaging(isApproved, pageable);
         }
 
         return convertToArticleList(articleEntities, authUserDetails);
+    }
+
+    @Override
+    public void approveArticle(String slug) {
+        ArticleEntity found = articleRepository.findBySlug(slug).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
+        found.setIsApproved(1);
+        articleRepository.save(found);
     }
 
     private ArticleDto convertEntityToDto(ArticleEntity entity, Boolean favorited, Long favoritesCount, AuthUserDetails authUserDetails) {

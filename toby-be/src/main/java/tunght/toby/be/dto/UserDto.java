@@ -10,6 +10,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -18,10 +19,10 @@ import javax.validation.constraints.Size;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 public class UserDto {
     private String email;
-    private String token;
     private String username;
     private String bio;
     private String image;
+    private List<String> roles;
 
     @Getter
     @AllArgsConstructor
@@ -79,9 +80,6 @@ public class UserDto {
         private String username;
         private String bio;
         private String image;
-        @NotBlank(message = "mật khẩu không được để trống")
-        @Size(min = 8, max = 32, message = "mật khẩu phải từ 8-32 kí tự")
-        private String password;
     }
 
     @Getter

@@ -10,8 +10,8 @@ import javax.validation.constraints.AssertTrue;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FeedParams {
-    protected Integer offset;
-    protected Integer limit;
+    protected Integer offset; // pageNo
+    protected Integer limit; // pageSize
 
     @AssertTrue
     protected boolean getValidPage() {

@@ -1,5 +1,6 @@
 package tunght.toby.be.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class ArticlesController {
     }
 
     @PutMapping("/{slug}")
-    public ArticleDto.SingleArticle<ArticleDto> createArticle(@PathVariable String slug, @Valid @RequestBody ArticleDto.SingleArticle<ArticleDto.Update> article, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
+    public ArticleDto.SingleArticle<ArticleDto> updateArticle(@PathVariable String slug, @Valid @RequestBody ArticleDto.SingleArticle<ArticleDto.Update> article, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
         return new ArticleDto.SingleArticle<>(articleService.updateArticle(slug, article.getArticle(), authUserDetails));
     }
 
@@ -57,9 +58,10 @@ public class ArticlesController {
         return new ArticleDto.SingleArticle<>(articleService.unfavoriteArticle(slug, authUserDetails));
     }
 
+    @Operation(summary = "These posts any user can see")
     @GetMapping
     public ArticleDto.MultipleArticle listArticles(@ModelAttribute ArticleQueryParam articleQueryParam, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
-        List<ArticleDto> dtos = articleService.listArticle(articleQueryParam, authUserDetails);
+        List<ArticleDto> dtos = articleService.listArticle(articleQueryParam, 1, authUserDetails);
         return ArticleDto.MultipleArticle.builder().articles(dtos).articlesCount(dtos.size()).build();
     }
 
@@ -80,5 +82,17 @@ public class ArticlesController {
         return CommentDto.MultipleComments.builder()
                 .comments(commentService.getCommentsBySlug(slug, authUserDetails))
                 .build();
+    }
+
+    @Operation(summary = "These posts only admins can see, and if they are approved, other users can see")
+    @GetMapping("/unapproved")
+    public ArticleDto.MultipleArticle listUnapprovedArticles(@ModelAttribute ArticleQueryParam articleQueryParam, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
+        List<ArticleDto> dtos = articleService.listArticle(articleQueryParam, 0, authUserDetails);
+        return ArticleDto.MultipleArticle.builder().articles(dtos).articlesCount(dtos.size()).build();
+    }
+
+    @PutMapping("/approve/{slug}")
+    public void approveArticle(@PathVariable String slug) {
+        articleService.approveArticle(slug);
     }
 }

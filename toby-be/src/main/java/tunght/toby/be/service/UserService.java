@@ -7,7 +7,7 @@ import tunght.toby.common.security.AuthUserDetails;
 public interface UserService {
     UserDto.RegistrationResponse registration(final UserDto.Registration registration);
 
-    UserDto login(final UserDto.Login login);
+    String login(final UserDto.Login login);
 
     UserDto currentUser(final AuthUserDetails authUserDetails);
 

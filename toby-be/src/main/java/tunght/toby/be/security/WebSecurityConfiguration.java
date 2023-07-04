@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import tunght.toby.common.enums.ERole;
 import tunght.toby.common.security.CustomPasswordEncoder;
 import tunght.toby.common.security.JWTAuthFilter;
 
@@ -38,6 +39,11 @@ public class WebSecurityConfiguration {
             "/tags/**",
     };
 
+    final String[] adminEndpoints = {
+            "/articles/unapproved",
+            "/articles/approve/**",
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -47,9 +53,10 @@ public class WebSecurityConfiguration {
                 .formLogin().disable()
                 .authorizeRequests()
                 .antMatchers(generalEndpoints).permitAll()
+                .antMatchers(adminEndpoints).hasAuthority(ERole.ROLE_ADMIN.name())
                 .antMatchers(HttpMethod.GET, "/articles/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/profiles/**").permitAll()
-                .anyRequest().hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                .anyRequest().hasAnyAuthority(ERole.ROLE_ADMIN.name(), ERole.ROLE_USER.name())
                 .and()
                 .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 .and()

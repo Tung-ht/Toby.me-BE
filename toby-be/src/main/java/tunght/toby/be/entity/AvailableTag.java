@@ -16,4 +16,5 @@ public class AvailableTag {
     @Id
     private Long id;
     private String tagName;
+    private Integer isPinned;
 }

@@ -60,7 +60,7 @@ public class MailSender {
             Transport.send(message);
 
             if (action == EUserAction.VERIFY_EMAIL) {
-                var user = userRepository.findLastestCreatedAccountByMail(sendTo).orElseThrow(()-> new AppException(Error.USER_NOT_FOUND));
+                var user = userRepository.findLatestCreatedAccountByMail(sendTo).orElseThrow(()-> new AppException(Error.USER_NOT_FOUND));
                 user.setOtp(otp);
                 userRepository.save(user);
             }

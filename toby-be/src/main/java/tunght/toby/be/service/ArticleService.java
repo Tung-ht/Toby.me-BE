@@ -22,5 +22,6 @@ public interface ArticleService {
 
     ArticleDto unfavoriteArticle(final String slug, final AuthUserDetails authUserDetails);
 
-    List<ArticleDto> listArticle(final ArticleQueryParam articleQueryParam, final AuthUserDetails authUserDetails);
+    List<ArticleDto> listArticle(final ArticleQueryParam articleQueryParam, Integer isApproved, final AuthUserDetails authUserDetails);
+    void approveArticle(String slug);
 }

@@ -52,5 +52,6 @@ public class ArticleDto {
         private String title;
         private String description;
         private String body;
+        private List<String> tagList;
     }
 }

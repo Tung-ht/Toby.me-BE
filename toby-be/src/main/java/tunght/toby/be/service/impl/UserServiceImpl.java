@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tunght.toby.be.consts.EUserAction;
 import tunght.toby.be.dto.UserDto;
+import tunght.toby.be.repository.RoleRepository;
 import tunght.toby.be.repository.UserRepository;
 import tunght.toby.be.service.UserService;
 import tunght.toby.be.utils.MailSender;
 import tunght.toby.common.entity.UserEntity;
+import tunght.toby.common.enums.ERole;
 import tunght.toby.common.enums.EStatus;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
@@ -19,11 +21,14 @@ import tunght.toby.common.security.JwtUtils;
 import tunght.toby.common.utils.JsonConverter;
 
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final JwtUtils jwtUtils;
     private final PasswordEncoder passwordEncoder;
     private final RedisTemplate<String, String> redisTemplate;
@@ -39,7 +44,10 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(registration.getPassword()))
                 .bio("")
                 .status(EStatus.INACTIVE)
+                .roles(new HashSet<>())
                 .build();
+        final var ROLE_USER = roleRepository.findByRole(ERole.ROLE_USER).orElseThrow(() -> new AppException(Error.ROLE_NOT_FOUND));
+        userEntity.getRoles().add(ROLE_USER);
         userEntity = userRepository.save(userEntity);
         mailSender.sendMail(userEntity.getEmail(), EUserAction.VERIFY_EMAIL);
         return UserDto.RegistrationResponse.builder().email(userEntity.getEmail()).build();
@@ -47,7 +55,7 @@ public class UserServiceImpl implements UserService {
 
     @Transactional(readOnly = true)
     @Override
-    public UserDto login(UserDto.Login login) {
+    public String login(UserDto.Login login) {
         UserEntity userEntity = userRepository.findByEmailAndStatus(login.getEmail(), EStatus.ACTIVE).filter(user -> passwordEncoder.matches(login.getPassword(), user.getPassword())).orElseThrow(() -> new AppException(Error.LOGIN_INFO_INVALID));
         String jwt = jwtUtils.encode(userEntity.getEmail());
         var userDetail = AuthUserDetails.builder()
@@ -59,11 +67,17 @@ public class UserServiceImpl implements UserService {
         var jsonStr = JsonConverter.serializeObject(userDetail);
         redisTemplate.opsForValue()
                 .set(jwt, jsonStr, Duration.ofSeconds(jwtUtils.getValidSeconds()));
-        return convertEntityToDto(userEntity);
+        return jwt;
     }
 
     private UserDto convertEntityToDto(UserEntity userEntity) {
-        return UserDto.builder().username(userEntity.getUsername()).bio(userEntity.getBio()).email(userEntity.getEmail()).image(userEntity.getImage()).token(jwtUtils.encode(userEntity.getEmail())).build();
+        return UserDto.builder()
+                .username(userEntity.getUsername())
+                .bio(userEntity.getBio())
+                .email(userEntity.getEmail())
+                .image(userEntity.getImage())
+                .roles(userEntity.getRoles().stream().map(role -> role.getRole().name()).collect(Collectors.toList()))
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -84,10 +98,6 @@ public class UserServiceImpl implements UserService {
             userEntity.setUsername(update.getUsername());
         }
 
-        if (update.getPassword() != null) {
-            userEntity.setPassword(passwordEncoder.encode(update.getPassword()));
-        }
-
         if (update.getBio() != null) {
             userEntity.setBio(update.getBio());
         }
@@ -102,7 +112,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void registrationVerify(UserDto.RegistrationOTP registrationOTP) {
-        var user = userRepository.findLastestCreatedAccountByMail(registrationOTP.getEmail())
+        var user = userRepository.findLatestCreatedAccountByMail(registrationOTP.getEmail())
                 .orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
         var otp = user.getOtp();
         if (otp == null || !otp.equals(registrationOTP.getOtp())) {

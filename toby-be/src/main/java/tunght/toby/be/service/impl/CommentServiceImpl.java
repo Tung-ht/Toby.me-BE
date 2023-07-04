@@ -13,6 +13,7 @@ import tunght.toby.be.service.CommentService;
 import tunght.toby.be.service.ProfileService;
 import tunght.toby.common.entity.BaseEntity;
 import tunght.toby.common.entity.UserEntity;
+import tunght.toby.common.enums.ERole;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.security.AuthUserDetails;
@@ -47,13 +48,20 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     @Override
     public void delete(String slug, Long commentId, AuthUserDetails authUserDetails) {
-        Long articleId = articleRepository.findBySlug(slug).map(BaseEntity::getId).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
+        var isAdmin = authUserDetails.getAuthorities().stream()
+                .anyMatch(role -> role.getAuthority().equals(ERole.ROLE_ADMIN.name()));
+
+        ArticleEntity article = articleRepository.findBySlug(slug).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
+        var isPostAuthor = article.getAuthor().getId().equals(authUserDetails.getId());
 
         CommentEntity commentEntity = commentRepository.findById(commentId)
-                .filter(comment -> comment.getArticle().getId().equals(articleId))
+                .filter(comment -> comment.getArticle().getId().equals(article.getId()))
                 .orElseThrow(() -> new AppException(Error.COMMENT_NOT_FOUND));
+        var isCommentAuthor = commentEntity.getAuthor().getId().equals(authUserDetails.getId());
 
-        commentRepository.delete(commentEntity);
+        if (isAdmin || isPostAuthor || isCommentAuthor) {
+            commentRepository.delete(commentEntity);
+        }
     }
 
     @Override

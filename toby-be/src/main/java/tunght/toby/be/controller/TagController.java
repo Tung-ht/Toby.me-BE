@@ -20,10 +20,19 @@ public class TagController {
     private final TagService tagService;
     private final AvailableTagRepository availableTagRepository;
 
-    @Operation(summary = "Get tags by popularity for home page")
+    @Operation(summary = "Get tags sorted by popularity for home page")
     @GetMapping
     public TagDto.TagList getTagsByPopularity() {
         return TagDto.TagList.builder().tags(tagService.getTagsByPopularity()).build();
+    }
+
+    @Operation(summary = "Get pinned tags (like: rule, notification,...) for main page")
+    public TagDto.TagList getPinnedTags() {
+        List<String> pinnedTags = availableTagRepository.getAllByIsPinned(1)
+                .stream()
+                .map(AvailableTag::getTagName)
+                .collect(Collectors.toList());
+        return TagDto.TagList.builder().tags(pinnedTags).build();
     }
 
     @Operation(summary = "Get tags list for drop-down selector when user creating articles")
