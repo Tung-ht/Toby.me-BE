@@ -56,14 +56,18 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public String login(UserDto.Login login) {
-        UserEntity userEntity = userRepository.findByEmailAndStatus(login.getEmail(), EStatus.ACTIVE).filter(user -> passwordEncoder.matches(login.getPassword(), user.getPassword())).orElseThrow(() -> new AppException(Error.LOGIN_INFO_INVALID));
+        UserEntity userEntity = userRepository.findAllByEmailAndStatus(login.getEmail(), EStatus.ACTIVE)
+                .stream()
+                .filter(user -> passwordEncoder.matches(login.getPassword(), user.getPassword()))
+                .findFirst()
+                .orElseThrow(() -> new AppException(Error.LOGIN_INFO_INVALID));
         String jwt = jwtUtils.encode(userEntity.getEmail());
         var userDetail = AuthUserDetails.builder()
                 .id(userEntity.getId())
                 .email(userEntity.getEmail())
                 .authorities(userEntity.getRoles())
                 .build();
-        // when an user logged in, (jwt-userInfo)-(string-jsonString) is cached into redis
+        // when a user logged in, (jwt-userInfo)-(string-jsonString) is cached into redis
         var jsonStr = JsonConverter.serializeObject(userDetail);
         redisTemplate.opsForValue()
                 .set(jwt, jsonStr, Duration.ofSeconds(jwtUtils.getValidSeconds()));
@@ -92,8 +96,10 @@ public class UserServiceImpl implements UserService {
         UserEntity userEntity = userRepository.findById(authUserDetails.getId()).orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
 
         if (update.getUsername() != null) {
-            userRepository.findByUsername(update.getUsername())
+            userRepository.findAllByUsernameAndStatus(update.getUsername(), EStatus.ACTIVE)
+                    .stream()
                     .filter(found -> !found.getId().equals(userEntity.getId()))
+                    .findFirst()
                     .ifPresent(found -> {throw new AppException(Error.DUPLICATED_USER);});
             userEntity.setUsername(update.getUsername());
         }
@@ -111,21 +117,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void registrationVerify(UserDto.RegistrationOTP registrationOTP) {
-        var user = userRepository.findLatestCreatedAccountByMail(registrationOTP.getEmail())
+    public void requestVerify(UserDto.RequestOTP requestOTP) {
+        var user = userRepository.findLatestCreatedAccountByMail(requestOTP.getEmail())
                 .orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
         var otp = user.getOtp();
-        if (otp == null || !otp.equals(registrationOTP.getOtp())) {
+        // if otp is null -> exception is caught -> Error 422
+        if (!otp.equals(requestOTP.getOtp())) {
             throw new AppException(Error.OTP_INVALID);
         } else {
-            user.setStatus(EStatus.ACTIVE);
-            userRepository.save(user);
+            if (requestOTP.getUserAction().equals(EUserAction.VERIFY_EMAIL)) {
+                user.setStatus(EStatus.ACTIVE);
+                userRepository.save(user);
+            }
+            // if RESET_PASSWORD -> return 200
         }
     }
 
     @Override
-    public void resendOTP(EUserAction action, String email) {
-        var users = userRepository.findByEmail(email);
+    public void sendOTP(EUserAction action, String email) {
+        var users = userRepository.findAllByEmail(email);
         if (users.isEmpty()) {
             throw new AppException(Error.USER_NOT_FOUND);
         }

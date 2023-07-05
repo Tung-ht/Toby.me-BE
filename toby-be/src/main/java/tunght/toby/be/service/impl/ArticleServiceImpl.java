@@ -49,6 +49,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .title(article.getTitle())
                 .description(article.getDescription())
                 .body(article.getBody())
+                .isApproved(0)
                 .author(author)
                 .build();
         List<ArticleTagRelationEntity> tagList = new ArrayList<>();

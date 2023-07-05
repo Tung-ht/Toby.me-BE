@@ -9,6 +9,7 @@ import tunght.toby.be.repository.FollowRepository;
 import tunght.toby.be.repository.UserRepository;
 import tunght.toby.be.service.ProfileService;
 import tunght.toby.common.entity.UserEntity;
+import tunght.toby.common.enums.EStatus;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.security.AuthUserDetails;
@@ -21,7 +22,10 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public ProfileDto getProfile(String name, AuthUserDetails authUserDetails) {
-        UserEntity user = userRepository.findByUsername(name).orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
+        UserEntity user = userRepository.findAllByUsernameAndStatus(name, EStatus.ACTIVE)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
         boolean following = false;
         if (authUserDetails != null) {
             following = followRepository.findByFolloweeIdAndFollowerId(user.getId(), authUserDetails.getId()).isPresent();
@@ -32,7 +36,10 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional
     @Override
     public ProfileDto followUser(String name, AuthUserDetails authUserDetails) {
-        UserEntity followee = userRepository.findByUsername(name).orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
+        UserEntity followee = userRepository.findAllByUsernameAndStatus(name, EStatus.ACTIVE)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
         UserEntity follower = UserEntity.builder().id(authUserDetails.getId()).build(); // myself
 
         followRepository.findByFolloweeIdAndFollowerId(followee.getId(), follower.getId())
@@ -47,7 +54,10 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional
     @Override
     public ProfileDto unfollowUser(String name, AuthUserDetails authUserDetails) {
-        UserEntity followee = userRepository.findByUsername(name).orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
+        UserEntity followee = userRepository.findAllByUsernameAndStatus(name, EStatus.ACTIVE)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
         UserEntity follower = UserEntity.builder().id(authUserDetails.getId()).build(); // myself
 
         FollowEntity follow = followRepository.findByFolloweeIdAndFollowerId(followee.getId(), follower.getId())

@@ -37,6 +37,8 @@ public class WebSecurityConfiguration {
             "/images/**",
             "/users/**",
             "/tags/**",
+            "/send-otp",
+            "/verify"
     };
 
     final String[] adminEndpoints = {

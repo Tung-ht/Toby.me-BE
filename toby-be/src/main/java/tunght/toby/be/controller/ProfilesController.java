@@ -1,5 +1,7 @@
 package tunght.toby.be.controller;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import tunght.toby.be.dto.ProfileDto;
 import tunght.toby.be.service.ProfileService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,11 @@ import tunght.toby.common.security.AuthUserDetails;
 @RestController
 @RequestMapping("/profiles")
 @RequiredArgsConstructor
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "OK"),
+        @ApiResponse(responseCode = "422", description = "Failed, unknown error"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+})
 public class ProfilesController {
     private final ProfileService profileService;
 

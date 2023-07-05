@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import tunght.toby.be.consts.EUserAction;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -87,8 +88,9 @@ public class UserDto {
     @Builder
     @JsonTypeName("user")
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
-    public static class RegistrationOTP {
+    public static class RequestOTP {
         private String email;
         private String otp;
+        private EUserAction userAction;
     }
 }

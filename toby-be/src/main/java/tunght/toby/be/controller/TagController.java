@@ -1,6 +1,8 @@
 package tunght.toby.be.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import tunght.toby.be.dto.TagDto;
 import tunght.toby.be.entity.AvailableTag;
 import tunght.toby.be.repository.AvailableTagRepository;
@@ -16,6 +18,11 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/tags")
 @RequiredArgsConstructor
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "OK"),
+        @ApiResponse(responseCode = "422", description = "Failed, unknown error"),
+        @ApiResponse(responseCode = "404", description = "Not Found"),
+})
 public class TagController {
     private final TagService tagService;
     private final AvailableTagRepository availableTagRepository;

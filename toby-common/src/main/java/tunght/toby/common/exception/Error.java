@@ -12,6 +12,7 @@ public enum Error {
     OTP_INVALID("otp không hợp lệ", HttpStatus.UNPROCESSABLE_ENTITY),
 
     USER_NOT_FOUND("người dùng không tồn tại", HttpStatus.NOT_FOUND),
+    ROLE_NOT_FOUND("role không tồn tại", HttpStatus.NOT_FOUND),
     FOLLOW_NOT_FOUND("follow không tồn tại", HttpStatus.NOT_FOUND),
     ARTICLE_NOT_FOUND("bài viết không tồn tại", HttpStatus.NOT_FOUND),
     FAVORITE_NOT_FOUND("follow không tồn tại", HttpStatus.NOT_FOUND),

@@ -35,7 +35,7 @@ public class AuthUserDetails implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         var grantedAuthorities = new HashSet<GrantedAuthority>();
         for (RoleEntity role: this.authorities) {
-            grantedAuthorities.add(new SimpleGrantedAuthority(role.getRole()));
+            grantedAuthorities.add(new SimpleGrantedAuthority(role.getRole().name()));
         }
         return grantedAuthorities;
     }

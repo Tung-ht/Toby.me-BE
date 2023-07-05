@@ -14,11 +14,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     List<UserEntity> findAllByUsernameAndStatus(String username, EStatus status);
     List<UserEntity> findAllByEmailAndStatus(String email, EStatus status);
-
-    Optional<UserEntity> findByEmailAndStatus(String email, EStatus status);
-
-    Optional<UserEntity> findByUsername(String username);
-    List<UserEntity> findByEmail(String email);
+    List<UserEntity> findAllByUsername(String username);
+    List<UserEntity> findAllByEmail(String email);
 
     @Query(value = "SELECT * FROM users WHERE email = :email " +
             "ORDER BY created_at DESC " +

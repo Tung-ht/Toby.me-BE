@@ -3,6 +3,7 @@ package tunght.toby.common.entity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import tunght.toby.common.enums.ERole;
 
 import javax.persistence.*;
 
@@ -15,5 +16,7 @@ public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String role;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private ERole role;
 }
