@@ -13,7 +13,7 @@ public class TagServiceImpl implements TagService {
     private final TagRepository tagRepository;
 
     @Override
-    public List<String> getTagsByPopularity() {
-        return tagRepository.getTagsByPopularity();
+    public List<String> getTagsByPopularity(Integer isApproved) {
+        return tagRepository.getTagsByPopularity(isApproved);
     }
 }

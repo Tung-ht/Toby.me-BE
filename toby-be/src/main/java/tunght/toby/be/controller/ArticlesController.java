@@ -67,9 +67,14 @@ public class ArticlesController {
 
     @Operation(summary = "These posts any user can see")
     @GetMapping
-    public ArticleDto.MultipleArticle listArticles(@ModelAttribute ArticleQueryParam articleQueryParam, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
-        List<ArticleDto> dtos = articleService.listArticle(articleQueryParam, 1, authUserDetails);
-        return ArticleDto.MultipleArticle.builder().articles(dtos).articlesCount(dtos.size()).build();
+    public ArticleDto.MultipleArticle listApprovedArticles(@ModelAttribute ArticleQueryParam articleQueryParam, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
+        return articleService.listArticle(articleQueryParam, 1, authUserDetails);
+    }
+
+    @Operation(summary = "These posts only admins can see, and if they are approved, other users can see")
+    @GetMapping("/unapproved")
+    public ArticleDto.MultipleArticle listUnapprovedArticles(@ModelAttribute ArticleQueryParam articleQueryParam, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
+        return articleService.listArticle(articleQueryParam, 0, authUserDetails);
     }
 
     @PostMapping("/{slug}/comments")
@@ -89,13 +94,6 @@ public class ArticlesController {
         return CommentDto.MultipleComments.builder()
                 .comments(commentService.getCommentsBySlug(slug, authUserDetails))
                 .build();
-    }
-
-    @Operation(summary = "These posts only admins can see, and if they are approved, other users can see")
-    @GetMapping("/unapproved")
-    public ArticleDto.MultipleArticle listUnapprovedArticles(@ModelAttribute ArticleQueryParam articleQueryParam, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
-        List<ArticleDto> dtos = articleService.listArticle(articleQueryParam, 0, authUserDetails);
-        return ArticleDto.MultipleArticle.builder().articles(dtos).articlesCount(dtos.size()).build();
     }
 
     @PutMapping("/approve/{slug}")

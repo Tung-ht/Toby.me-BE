@@ -11,9 +11,10 @@ import java.util.List;
 public interface TagRepository extends JpaRepository<ArticleTagRelationEntity, Long> {
     @Query(value =
             "SELECT tmp.tag FROM " +
-            "(SELECT tag, COUNT(*) AS tag_count " +
-            "FROM tags " +
-            "GROUP BY tag " +
-            "ORDER BY tag_count DESC) as tmp", nativeQuery = true)
-    List<String> getTagsByPopularity();
+            "(SELECT t.tag, COUNT(*) AS tag_count " +
+            "FROM tags t INNER JOIN articles a ON t.article_id = a.id " +
+            "WHERE a.is_approved = :isApproved " +
+            "GROUP BY t.tag " +
+            "ORDER BY tag_count DESC, t.tag ASC) as tmp", nativeQuery = true)
+    List<String> getTagsByPopularity(Integer isApproved);
 }

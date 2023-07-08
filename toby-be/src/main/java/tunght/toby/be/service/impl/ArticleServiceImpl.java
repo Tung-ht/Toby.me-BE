@@ -1,6 +1,7 @@
 package tunght.toby.be.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -171,24 +172,37 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ArticleDto> listArticle(ArticleQueryParam articleQueryParam, Integer isApproved, AuthUserDetails authUserDetails) {
+    public ArticleDto.MultipleArticle listArticle(ArticleQueryParam articleQueryParam, Integer isApproved, AuthUserDetails authUserDetails) {
         Pageable pageable = null;
         if (articleQueryParam.getOffset() != null && articleQueryParam.getLimit() != null) {
             pageable = PageRequest.of(articleQueryParam.getOffset(), articleQueryParam.getLimit());
         }
 
-        List<ArticleEntity> articleEntities;
+        Page<ArticleEntity> articlePageObject;
         if (articleQueryParam.getTag() != null) {
-            articleEntities = articleRepository.findByTag(articleQueryParam.getTag(), isApproved, pageable);
+            articlePageObject = articleRepository.findByTag(articleQueryParam.getTag(), isApproved, pageable);
         } else if (articleQueryParam.getAuthor() != null) {
-            articleEntities = articleRepository.findByAuthorName(articleQueryParam.getAuthor(), isApproved, pageable);
+            articlePageObject = articleRepository.findByAuthorName(articleQueryParam.getAuthor(), isApproved, pageable);
         } else if (articleQueryParam.getFavorited() != null) {
-            articleEntities = articleRepository.findByFavoritedUsername(articleQueryParam.getFavorited(), pageable);
+            articlePageObject = articleRepository.findByFavoritedUsername(articleQueryParam.getFavorited(), pageable);
         } else {
-            articleEntities = articleRepository.findListByPaging(isApproved, pageable);
+            articlePageObject = articleRepository.findListByPaging(isApproved, pageable);
         }
 
-        return convertToArticleList(articleEntities, authUserDetails);
+        var dtos = articlePageObject.stream().map(entity -> {
+            List<FavoriteEntity> favorites = entity.getFavoriteList();
+            long favoriteCount = favorites.size();
+            boolean favorited = false;
+            if (authUserDetails != null) {
+                favorited = favorites.stream().anyMatch(favoriteEntity -> favoriteEntity.getUser().getId().equals(authUserDetails.getId()));
+            }
+            return convertEntityToDto(entity, favorited, favoriteCount, authUserDetails);
+        }).collect(Collectors.toList());
+        return ArticleDto.MultipleArticle
+                .builder()
+                .articles(dtos)
+                .articlesCount((int) articlePageObject.getTotalElements())
+                .build();
     }
 
     @Override
@@ -212,17 +226,5 @@ public class ArticleServiceImpl implements ArticleService {
                 .favoritesCount(favoritesCount)
                 .tagList(entity.getTagList().stream().map(ArticleTagRelationEntity::getTag).collect(Collectors.toList()))
                 .build();
-    }
-
-    private List<ArticleDto> convertToArticleList(List<ArticleEntity> articleEntities, AuthUserDetails authUserDetails) {
-        return articleEntities.stream().map(entity -> {
-            List<FavoriteEntity> favorites = entity.getFavoriteList();
-            long favoriteCount = favorites.size();
-            boolean favorited = false;
-            if (authUserDetails != null) {
-                favorited = favorites.stream().anyMatch(favoriteEntity -> favoriteEntity.getUser().getId().equals(authUserDetails.getId()));
-            }
-            return convertEntityToDto(entity, favorited, favoriteCount, authUserDetails);
-        }).collect(Collectors.toList());
     }
 }

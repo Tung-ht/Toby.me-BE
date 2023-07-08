@@ -35,8 +35,8 @@ public class UsersController {
 
     @Operation(summary = "api verify OTP for REGISTRATION and RESET_PASSWORD")
     @PostMapping("/verify")
-    public void verifyOTP(@RequestBody UserDto.RequestOTP registrationOTP) {
-        userService.requestVerify(registrationOTP);
+    public void verifyOTP(@RequestParam(value = "action") EUserAction action, @RequestBody UserDto.RequestOTP registrationOTP) {
+        userService.requestVerify(action, registrationOTP);
     }
 
     @Operation(summary = "api send OTP for REGISTRATION and RESET_PASSWORD")

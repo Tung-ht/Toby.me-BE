@@ -13,7 +13,7 @@ public interface UserService {
 
     UserDto update(final UserDto.Update update, final AuthUserDetails authUserDetails);
 
-    void requestVerify(UserDto.RequestOTP requestOTP);
+    void requestVerify(EUserAction action, UserDto.RequestOTP requestOTP);
 
     void sendOTP(EUserAction action, String email);
 }

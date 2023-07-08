@@ -117,7 +117,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void requestVerify(UserDto.RequestOTP requestOTP) {
+    public void requestVerify(EUserAction action, UserDto.RequestOTP requestOTP) {
         var user = userRepository.findLatestCreatedAccountByMail(requestOTP.getEmail())
                 .orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
         var otp = user.getOtp();
@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
         if (!otp.equals(requestOTP.getOtp())) {
             throw new AppException(Error.OTP_INVALID);
         } else {
-            if (requestOTP.getUserAction().equals(EUserAction.VERIFY_EMAIL)) {
+            if (action.equals(EUserAction.VERIFY_EMAIL)) {
                 user.setStatus(EStatus.ACTIVE);
                 userRepository.save(user);
             }

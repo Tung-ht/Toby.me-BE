@@ -91,6 +91,5 @@ public class UserDto {
     public static class RequestOTP {
         private String email;
         private String otp;
-        private EUserAction userAction;
     }
 }

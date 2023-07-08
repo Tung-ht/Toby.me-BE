@@ -36,8 +36,8 @@ public class CommentServiceImpl implements CommentService {
         CommentEntity commentEntity = CommentEntity.builder()
                 .body(comment.getBody())
                 .author(UserEntity.builder()
-                        .id(authUserDetails.getId())
-                        .build())
+                .id(authUserDetails.getId())
+                .build())
                 .article(articleEntity)
                 .build();
         commentRepository.save(commentEntity);
