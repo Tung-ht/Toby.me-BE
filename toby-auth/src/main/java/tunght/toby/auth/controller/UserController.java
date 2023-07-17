@@ -1,12 +1,12 @@
-package tunght.toby.be.controller;
+package tunght.toby.auth.controller;
 
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import tunght.toby.be.dto.UserDto;
-import tunght.toby.be.service.UserService;
+import tunght.toby.auth.dto.UserDto;
+import tunght.toby.auth.service.UserService;
 import tunght.toby.common.security.AuthUserDetails;
 
 import javax.validation.Valid;

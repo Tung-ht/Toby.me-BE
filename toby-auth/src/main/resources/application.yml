@@ -18,7 +18,7 @@ spring:
 
 logging:
   file:
-    name: logs/toby-be.log
+    name: logs/toby-auth.log
     max-size: 10MB
   pattern:
     file: "%d [%t] %-5level %logger{36} - %msg%n"
@@ -34,3 +34,5 @@ toby:
     token:
       sign-key: signKey012345678901234567890123456789
       valid-time: 3600
+  otp:
+    valid-time: 180

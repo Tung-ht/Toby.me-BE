@@ -1,7 +1,6 @@
-package tunght.toby.be.utils;
+package tunght.toby.auth.utils;
 
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -9,7 +8,7 @@ import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
-import tunght.toby.be.consts.MailConst;
+import tunght.toby.auth.consts.MailConst;
 
 @Service
 public class MailTemplate {

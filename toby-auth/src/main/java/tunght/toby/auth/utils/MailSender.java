@@ -1,11 +1,11 @@
-package tunght.toby.be.utils;
+package tunght.toby.auth.utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import tunght.toby.be.consts.EUserAction;
-import tunght.toby.be.consts.MailConst;
-import tunght.toby.be.repository.UserRepository;
+import tunght.toby.auth.consts.EUserAction;
+import tunght.toby.auth.consts.MailConst;
+import tunght.toby.auth.repository.UserRepository;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.utils.DataUtils;

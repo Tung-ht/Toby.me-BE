@@ -1,8 +1,7 @@
-package tunght.toby.be.security;
+package tunght.toby.auth.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,12 +34,7 @@ public class WebSecurityConfiguration {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/images/**",
-            "/tags/**",
-    };
-
-    final String[] adminEndpoints = {
-            "/articles/unapproved",
-            "/articles/approve/**",
+            "/users/**",
     };
 
     @Bean
@@ -52,9 +46,6 @@ public class WebSecurityConfiguration {
                 .formLogin().disable()
                 .authorizeRequests()
                 .antMatchers(generalEndpoints).permitAll()
-                .antMatchers(adminEndpoints).hasAuthority(ERole.ROLE_ADMIN.name())
-                .antMatchers(HttpMethod.GET, "/articles/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/profiles/**").permitAll()
                 .anyRequest().hasAnyAuthority(ERole.ROLE_ADMIN.name(), ERole.ROLE_USER.name())
                 .and()
                 .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))

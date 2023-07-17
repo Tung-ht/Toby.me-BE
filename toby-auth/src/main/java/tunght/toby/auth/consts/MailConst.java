@@ -1,4 +1,4 @@
-package tunght.toby.be.consts;
+package tunght.toby.auth.consts;
 
 public class MailConst {
     public static final String CONTENT_TYPE_TEXT_HTML = "text/html;charset=\"utf-8\"";

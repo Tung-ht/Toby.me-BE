@@ -1,13 +1,13 @@
-package tunght.toby.be.controller;
+package tunght.toby.auth.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import tunght.toby.be.consts.EUserAction;
-import tunght.toby.be.dto.UserDto;
-import tunght.toby.be.service.UserService;
+import tunght.toby.auth.consts.EUserAction;
+import tunght.toby.auth.dto.UserDto;
+import tunght.toby.auth.service.UserService;
 
 import javax.validation.Valid;
 
@@ -35,8 +35,8 @@ public class UsersController {
 
     @Operation(summary = "api verify OTP for REGISTRATION and RESET_PASSWORD")
     @PostMapping("/verify")
-    public void verifyOTP(@RequestParam(value = "action") EUserAction action, @RequestBody UserDto.RequestOTP registrationOTP) {
-        userService.requestVerify(action, registrationOTP);
+    public String verifyOTP(@RequestParam(value = "action") EUserAction action, @RequestBody UserDto.RequestOTP registrationOTP) {
+        return userService.requestVerify(action, registrationOTP);
     }
 
     @Operation(summary = "api send OTP for REGISTRATION and RESET_PASSWORD")

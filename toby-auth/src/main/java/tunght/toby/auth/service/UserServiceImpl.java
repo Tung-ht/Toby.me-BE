@@ -1,16 +1,16 @@
-package tunght.toby.be.service.impl;
+package tunght.toby.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tunght.toby.be.consts.EUserAction;
-import tunght.toby.be.dto.UserDto;
-import tunght.toby.be.repository.RoleRepository;
-import tunght.toby.be.repository.UserRepository;
-import tunght.toby.be.service.UserService;
-import tunght.toby.be.utils.MailSender;
+import tunght.toby.auth.consts.CommonConst;
+import tunght.toby.auth.consts.EUserAction;
+import tunght.toby.auth.dto.UserDto;
+import tunght.toby.auth.repository.RoleRepository;
+import tunght.toby.auth.repository.UserRepository;
+import tunght.toby.auth.utils.MailSender;
 import tunght.toby.common.entity.UserEntity;
 import tunght.toby.common.enums.ERole;
 import tunght.toby.common.enums.EStatus;
@@ -36,8 +36,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto.RegistrationResponse registration(UserDto.Registration registration) {
+        // maybe there are several accounts with the same email, but only 1 account is activated
         userRepository.findAllByEmailAndStatus(registration.getEmail(), EStatus.ACTIVE).stream().findAny().ifPresent(entity -> {throw new AppException(Error.DUPLICATED_USER);});
+
+        // maybe there are several accounts with the same username, but only 1 account is activated
         userRepository.findAllByUsernameAndStatus(registration.getUsername(), EStatus.ACTIVE).stream().findAny().ifPresent(entity -> {throw new AppException(Error.DUPLICATED_USER);});
+
+
         UserEntity userEntity = UserEntity.builder()
                 .username(registration.getUsername())
                 .email(registration.getEmail())
@@ -117,7 +122,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void requestVerify(EUserAction action, UserDto.RequestOTP requestOTP) {
+    public String requestVerify(EUserAction action, UserDto.RequestOTP requestOTP) {
+        // maybe there are several accounts with the same email, but only the latest account will be activated
         var user = userRepository.findLatestCreatedAccountByMail(requestOTP.getEmail())
                 .orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
         var otp = user.getOtp();
@@ -128,8 +134,10 @@ public class UserServiceImpl implements UserService {
             if (action.equals(EUserAction.VERIFY_EMAIL)) {
                 user.setStatus(EStatus.ACTIVE);
                 userRepository.save(user);
+                return CommonConst.REGISTRATION_SUCCESS_MSG;
             }
             // if RESET_PASSWORD -> return 200
+            return CommonConst.RESET_PASSWORD_SUCCESS_MSG;
         }
     }
 
