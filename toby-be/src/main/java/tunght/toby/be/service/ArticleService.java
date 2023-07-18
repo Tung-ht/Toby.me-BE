@@ -22,7 +22,9 @@ public interface ArticleService {
 
     ArticleDto unfavoriteArticle(final String slug, final AuthUserDetails authUserDetails);
 
-    ArticleDto.MultipleArticle listArticle(final ArticleQueryParam articleQueryParam, Integer isApproved, final AuthUserDetails authUserDetails);
+    ArticleDto.MultipleArticle listPublicArticle(final ArticleQueryParam articleQueryParam, final AuthUserDetails authUserDetails);
+
+    ArticleDto.MultipleArticle listUnapprovedArticle(final ArticleQueryParam articleQueryParam, final AuthUserDetails authUserDetails);
 
     void approveArticle(String slug);
 }

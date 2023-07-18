@@ -68,13 +68,13 @@ public class ArticlesController {
     @Operation(summary = "These posts any user can see")
     @GetMapping
     public ArticleDto.MultipleArticle listApprovedArticles(@ModelAttribute ArticleQueryParam articleQueryParam, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
-        return articleService.listArticle(articleQueryParam, 1, authUserDetails);
+        return articleService.listPublicArticle(articleQueryParam, authUserDetails);
     }
 
-    @Operation(summary = "These posts only admins can see, and if they are approved, other users can see")
+    @Operation(summary = "These posts only admins and its author can see, and if they are approved, other users can see")
     @GetMapping("/unapproved")
     public ArticleDto.MultipleArticle listUnapprovedArticles(@ModelAttribute ArticleQueryParam articleQueryParam, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
-        return articleService.listArticle(articleQueryParam, 0, authUserDetails);
+        return articleService.listUnapprovedArticle(articleQueryParam, authUserDetails);
     }
 
     @PostMapping("/{slug}/comments")
@@ -84,6 +84,7 @@ public class ArticlesController {
                 .build();
     }
 
+    @Operation(summary = "admin, postAuthor, commentAuthor can delete this comment")
     @DeleteMapping("/{slug}/comments/{commentId}")
     public void deleteComment(@PathVariable("slug") String slug, @PathVariable("commentId") Long commentId, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
         commentService.delete(slug, commentId, authUserDetails);

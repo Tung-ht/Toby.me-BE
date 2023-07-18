@@ -9,10 +9,3 @@ spring:
     host: ip_address
     port: 6379
     timeout: 60000
-
-mail-sender:
-  host: smtp.gmail.com
-  port: 587
-  email: yourmail@gmail.com
-  password: your_password
-

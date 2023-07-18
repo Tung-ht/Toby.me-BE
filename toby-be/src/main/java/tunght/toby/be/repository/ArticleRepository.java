@@ -47,6 +47,8 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
     Page<ArticleEntity> findByTag(@Param("tag") String tag, Integer isApproved, Pageable pageable);
 
     @EntityGraph("fetch-author-tagList")
-    @Query("SELECT a FROM ArticleEntity a LEFT JOIN FavoriteEntity f ON f.article.id = a.id WHERE f.user.username = :username ORDER BY a.updatedAt DESC")
-    Page<ArticleEntity> findByFavoritedUsername(@Param("username") String username, Pageable pageable);
+    @Query("SELECT a FROM ArticleEntity a LEFT JOIN FavoriteEntity f ON f.article.id = a.id " +
+            "WHERE f.user.username = :username AND a.isApproved = :isApproved " +
+            "ORDER BY a.updatedAt DESC")
+    Page<ArticleEntity> findByFavoritedUsername(@Param("username") String username, Integer isApproved, Pageable pageable);
 }

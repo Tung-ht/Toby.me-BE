@@ -39,7 +39,6 @@ public class WebSecurityConfiguration {
     };
 
     final String[] adminEndpoints = {
-            "/articles/unapproved",
             "/articles/approve/**",
     };
 
@@ -53,6 +52,7 @@ public class WebSecurityConfiguration {
                 .authorizeRequests()
                 .antMatchers(generalEndpoints).permitAll()
                 .antMatchers(adminEndpoints).hasAuthority(ERole.ROLE_ADMIN.name())
+                .antMatchers("/articles/unapproved").hasAnyAuthority(ERole.ROLE_ADMIN.name(), ERole.ROLE_USER.name())
                 .antMatchers(HttpMethod.GET, "/articles/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/profiles/**").permitAll()
                 .anyRequest().hasAnyAuthority(ERole.ROLE_ADMIN.name(), ERole.ROLE_USER.name())

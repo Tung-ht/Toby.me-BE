@@ -14,11 +14,13 @@ import tunght.toby.be.entity.*;
 import tunght.toby.be.repository.ArticleRepository;
 import tunght.toby.be.repository.FavoriteRepository;
 import tunght.toby.be.repository.FollowRepository;
+import tunght.toby.be.repository.UserRepository;
 import tunght.toby.be.service.ArticleService;
 import tunght.toby.be.service.ProfileService;
 import tunght.toby.common.entity.BaseEntity;
 import tunght.toby.common.entity.UserEntity;
 import tunght.toby.common.enums.ERole;
+import tunght.toby.common.enums.EStatus;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.security.AuthUserDetails;
@@ -34,6 +36,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleRepository articleRepository;
     private final FollowRepository followRepository;
     private final FavoriteRepository favoriteRepository;
+    private final UserRepository userRepository;
 
     private final ProfileService profileService;
 
@@ -172,7 +175,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Transactional(readOnly = true)
     @Override
-    public ArticleDto.MultipleArticle listArticle(ArticleQueryParam articleQueryParam, Integer isApproved, AuthUserDetails authUserDetails) {
+    public ArticleDto.MultipleArticle listPublicArticle(ArticleQueryParam articleQueryParam, AuthUserDetails authUserDetails) {
         Pageable pageable = null;
         if (articleQueryParam.getOffset() != null && articleQueryParam.getLimit() != null) {
             pageable = PageRequest.of(articleQueryParam.getOffset(), articleQueryParam.getLimit());
@@ -180,23 +183,67 @@ public class ArticleServiceImpl implements ArticleService {
 
         Page<ArticleEntity> articlePageObject;
         if (articleQueryParam.getTag() != null) {
-            articlePageObject = articleRepository.findByTag(articleQueryParam.getTag(), isApproved, pageable);
+            articlePageObject = articleRepository.findByTag(articleQueryParam.getTag(), 1, pageable);
         } else if (articleQueryParam.getAuthor() != null) {
-            articlePageObject = articleRepository.findByAuthorName(articleQueryParam.getAuthor(), isApproved, pageable);
+            articlePageObject = articleRepository.findByAuthorName(articleQueryParam.getAuthor(), 1, pageable);
         } else if (articleQueryParam.getFavorited() != null) {
-            articlePageObject = articleRepository.findByFavoritedUsername(articleQueryParam.getFavorited(), pageable);
+            articlePageObject = articleRepository.findByFavoritedUsername(articleQueryParam.getFavorited(), 1, pageable);
         } else {
-            articlePageObject = articleRepository.findListByPaging(isApproved, pageable);
+            articlePageObject = articleRepository.findListByPaging(1, pageable);
         }
 
-        var dtos = articlePageObject.stream().map(entity -> {
-            List<FavoriteEntity> favorites = entity.getFavoriteList();
+        var dtos = articlePageObject.stream().map(article -> {
+            List<FavoriteEntity> favorites = article.getFavoriteList();
             long favoriteCount = favorites.size();
             boolean favorited = false;
             if (authUserDetails != null) {
                 favorited = favorites.stream().anyMatch(favoriteEntity -> favoriteEntity.getUser().getId().equals(authUserDetails.getId()));
             }
-            return convertEntityToDto(entity, favorited, favoriteCount, authUserDetails);
+            return convertEntityToDto(article, favorited, favoriteCount, authUserDetails);
+        }).collect(Collectors.toList());
+        return ArticleDto.MultipleArticle
+                .builder()
+                .articles(dtos)
+                .articlesCount((int) articlePageObject.getTotalElements())
+                .build();
+    }
+
+    @Override
+    public ArticleDto.MultipleArticle listUnapprovedArticle(ArticleQueryParam articleQueryParam, AuthUserDetails authUserDetails) {
+        Pageable pageable = null;
+        if (articleQueryParam.getOffset() != null && articleQueryParam.getLimit() != null) {
+            pageable = PageRequest.of(articleQueryParam.getOffset(), articleQueryParam.getLimit());
+        }
+
+        Page<ArticleEntity> articlePageObject;
+        if (articleQueryParam.getTag() != null) {
+            articlePageObject = articleRepository.findByTag(articleQueryParam.getTag(), 0, pageable);
+        } else if (articleQueryParam.getAuthor() != null) {
+            var author = userRepository.findAllByUsernameAndStatus(articleQueryParam.getAuthor(), EStatus.ACTIVE).get(0);
+            if (author == null) {
+                throw new AppException(Error.USER_NOT_FOUND);
+            }
+            var isAdmin = authUserDetails.getAuthorities().stream()
+                    .anyMatch(role -> role.getAuthority().equals(ERole.ROLE_ADMIN.name()));
+            var isAuthor = author.getId().equals(authUserDetails.getId());
+
+            if (isAdmin || isAuthor) {
+                articlePageObject = articleRepository.findByAuthorName(articleQueryParam.getAuthor(), 0, pageable);
+            } else {
+                return null;
+            }
+        } else {
+            articlePageObject = articleRepository.findListByPaging(0, pageable);
+        }
+
+        var dtos = articlePageObject.stream().map(article -> {
+            List<FavoriteEntity> favorites = article.getFavoriteList();
+            long favoriteCount = favorites.size();
+            boolean favorited = false;
+            if (authUserDetails != null) {
+                favorited = favorites.stream().anyMatch(favoriteEntity -> favoriteEntity.getUser().getId().equals(authUserDetails.getId()));
+            }
+            return convertEntityToDto(article, favorited, favoriteCount, authUserDetails);
         }).collect(Collectors.toList());
         return ArticleDto.MultipleArticle
                 .builder()
