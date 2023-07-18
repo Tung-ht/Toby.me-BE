@@ -36,9 +36,9 @@ public class MailSender {
     public void sendMail(String sendTo, EUserAction action) {
         Properties props = new Properties();
         props.put("mail.smtp.host", host);
+        props.put("mail.smtp.port", port);
         props.put("mail.smtp.starttls.enable", "true");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.port", port);
 
         Session session = Session.getInstance(props,
                 new Authenticator() {
