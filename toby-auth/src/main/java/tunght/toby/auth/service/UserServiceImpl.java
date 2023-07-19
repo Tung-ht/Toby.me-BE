@@ -48,6 +48,7 @@ public class UserServiceImpl implements UserService {
                 .email(registration.getEmail())
                 .password(passwordEncoder.encode(registration.getPassword()))
                 .bio("")
+                .image(CommonConst.DEFAULT_AVATAR_URL)
                 .status(EStatus.INACTIVE)
                 .roles(new HashSet<>())
                 .build();

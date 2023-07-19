@@ -208,6 +208,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ArticleDto.MultipleArticle listUnapprovedArticle(ArticleQueryParam articleQueryParam, AuthUserDetails authUserDetails) {
         Pageable pageable = null;

@@ -87,7 +87,7 @@
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-maven-plugin</artifactId>
 					<configuration>
-						<mainClass>tunght.toby.be.TobyBeApplication</mainClass>
+						<mainClass>tunght.toby.notification.TobyNotificationApplication</mainClass>
 						<layout>JAR</layout>
 					</configuration>
 					<executions>
