@@ -254,6 +254,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .build();
     }
 
+    @Transactional
     @Override
     public void approveArticle(String slug) {
         ArticleEntity found = articleRepository.findBySlug(slug).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
@@ -261,6 +262,7 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.save(found);
     }
 
+    @Transactional
     @Override
     public void pinArticle(String slug) {
         ArticleEntity found = articleRepository.findBySlug(slug).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
@@ -272,10 +274,10 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.save(found);
     }
 
+    @Transactional
     @Override
     public void unpinArticle(String slug) {
         ArticleEntity found = articleRepository.findBySlug(slug).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
-        var tagList = found.getTagList();
         var tagNeedToBeDeleted = tagRepository.findAllByTag(CommonConst.FEATURE_TAG);
         found.getTagList().removeAll(tagNeedToBeDeleted);
         articleRepository.save(found);
