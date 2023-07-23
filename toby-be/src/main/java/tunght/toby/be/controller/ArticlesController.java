@@ -15,6 +15,7 @@ import tunght.toby.be.service.CommentService;
 import tunght.toby.common.security.AuthUserDetails;
 
 import javax.validation.Valid;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestController
@@ -86,7 +87,7 @@ public class ArticlesController {
 
     @Operation(summary = "admin, postAuthor, commentAuthor can delete this comment")
     @DeleteMapping("/{slug}/comments/{commentId}")
-    public void deleteComment(@PathVariable("slug") String slug, @PathVariable("commentId") Long commentId, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
+    public void deleteComment(@PathVariable("slug") String slug, @PathVariable("commentId") Long commentId, @AuthenticationPrincipal AuthUserDetails authUserDetails) throws AccessDeniedException {
         commentService.delete(slug, commentId, authUserDetails);
     }
 
@@ -100,5 +101,13 @@ public class ArticlesController {
     @PutMapping("/approve/{slug}")
     public void approveArticle(@PathVariable String slug) {
         articleService.approveArticle(slug);
+    }
+
+    @PutMapping("/{slug}/comments/{commentId}")
+    public void updateComment(@PathVariable("slug") String slug,
+                              @PathVariable("commentId") Long commentId,
+                              @RequestBody CommentDto.Update newComment,
+                              @AuthenticationPrincipal AuthUserDetails authUserDetails) throws AccessDeniedException {
+        commentService.update(slug, commentId, newComment, authUserDetails);
     }
 }

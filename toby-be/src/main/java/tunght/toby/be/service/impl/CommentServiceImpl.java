@@ -18,6 +18,7 @@ import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.security.AuthUserDetails;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,8 +37,8 @@ public class CommentServiceImpl implements CommentService {
         CommentEntity commentEntity = CommentEntity.builder()
                 .body(comment.getBody())
                 .author(UserEntity.builder()
-                .id(authUserDetails.getId())
-                .build())
+                        .id(authUserDetails.getId())
+                        .build())
                 .article(articleEntity)
                 .build();
         commentRepository.save(commentEntity);
@@ -47,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional
     @Override
-    public void delete(String slug, Long commentId, AuthUserDetails authUserDetails) {
+    public void delete(String slug, Long commentId, AuthUserDetails authUserDetails) throws AccessDeniedException {
         var isAdmin = authUserDetails.getAuthorities().stream()
                 .anyMatch(role -> role.getAuthority().equals(ERole.ROLE_ADMIN.name()));
 
@@ -61,6 +62,8 @@ public class CommentServiceImpl implements CommentService {
 
         if (isAdmin || isPostAuthor || isCommentAuthor) {
             commentRepository.delete(commentEntity);
+        } else {
+            throw new AccessDeniedException(null);
         }
     }
 
@@ -68,8 +71,26 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentDto> getCommentsBySlug(String slug, AuthUserDetails authUserDetails) {
         Long articleId = articleRepository.findBySlug(slug).map(BaseEntity::getId).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
 
-        List<CommentEntity> commentEntities = commentRepository.findByArticleId(articleId);
+        List<CommentEntity> commentEntities = commentRepository.findByArticleIdOrderByCreatedAtAsc(articleId);
         return commentEntities.stream().map(commentEntity -> convertToDTO(authUserDetails, commentEntity)).collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentDto update(String slug, Long commentId, CommentDto.Update newComment, AuthUserDetails authUserDetails) throws AccessDeniedException {
+        ArticleEntity article = articleRepository.findBySlug(slug).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
+
+        CommentEntity commentEntity = commentRepository.findById(commentId)
+                .filter(comment -> comment.getArticle().getId().equals(article.getId()))
+                .orElseThrow(() -> new AppException(Error.COMMENT_NOT_FOUND));
+        var isCommentAuthor = commentEntity.getAuthor().getId().equals(authUserDetails.getId());
+
+        if (isCommentAuthor) {
+            commentEntity.setBody(newComment.getBody());
+            commentEntity = commentRepository.save(commentEntity);
+            return convertToDTO(authUserDetails, commentEntity);
+        } else {
+            throw new AccessDeniedException(null);
+        }
     }
 
     private CommentDto convertToDTO(AuthUserDetails authUserDetails, CommentEntity commentEntity) {

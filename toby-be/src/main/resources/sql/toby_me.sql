@@ -76,7 +76,7 @@ INSERT INTO `available_tags` VALUES (16, 'tâm sự', NULL);
 INSERT INTO `available_tags` VALUES (17, 'chém gió', NULL);
 INSERT INTO `available_tags` VALUES (18, 'thông báo', 1);
 INSERT INTO `available_tags` VALUES (19, 'nội quy', 1);
-
+INSERT INTO `available_tags` VALUES (20, 'nổi bật', 1);
 -- ----------------------------
 -- Table structure for comments
 -- ----------------------------

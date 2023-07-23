@@ -36,4 +36,9 @@ public class CommentDto {
     public static class MultipleComments {
         List<CommentDto> comments;
     }
+
+    @Getter
+    public static class Update {
+        String body;
+    }
 }
