@@ -27,4 +27,8 @@ public interface ArticleService {
     ArticleDto.MultipleArticle listUnapprovedArticle(final ArticleQueryParam articleQueryParam, final AuthUserDetails authUserDetails);
 
     void approveArticle(String slug);
+
+    void pinArticle(String slug);
+
+    void unpinArticle(String slug);
 }

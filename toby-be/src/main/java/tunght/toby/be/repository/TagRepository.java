@@ -17,4 +17,6 @@ public interface TagRepository extends JpaRepository<ArticleTagRelationEntity, L
             "GROUP BY t.tag " +
             "ORDER BY tag_count DESC, t.tag ASC) as tmp", nativeQuery = true)
     List<String> getTagsByPopularity(Integer isApproved);
+
+    List<ArticleTagRelationEntity> findAllByTag(String tag);
 }

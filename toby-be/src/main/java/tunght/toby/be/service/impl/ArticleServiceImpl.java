@@ -6,15 +6,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tunght.toby.be.consts.CommonConst;
 import tunght.toby.be.dto.ArticleDto;
 import tunght.toby.be.dto.ProfileDto;
 import tunght.toby.be.dto.model.ArticleQueryParam;
 import tunght.toby.be.dto.model.FeedParams;
-import tunght.toby.be.entity.*;
-import tunght.toby.be.repository.ArticleRepository;
-import tunght.toby.be.repository.FavoriteRepository;
-import tunght.toby.be.repository.FollowRepository;
-import tunght.toby.be.repository.UserRepository;
+import tunght.toby.be.entity.ArticleEntity;
+import tunght.toby.be.entity.ArticleTagRelationEntity;
+import tunght.toby.be.entity.FavoriteEntity;
+import tunght.toby.be.entity.FollowEntity;
+import tunght.toby.be.repository.*;
 import tunght.toby.be.service.ArticleService;
 import tunght.toby.be.service.ProfileService;
 import tunght.toby.common.entity.BaseEntity;
@@ -37,8 +38,8 @@ public class ArticleServiceImpl implements ArticleService {
     private final FollowRepository followRepository;
     private final FavoriteRepository favoriteRepository;
     private final UserRepository userRepository;
-
     private final ProfileService profileService;
+    private final TagRepository tagRepository;
 
     @Transactional
     @Override
@@ -257,6 +258,26 @@ public class ArticleServiceImpl implements ArticleService {
     public void approveArticle(String slug) {
         ArticleEntity found = articleRepository.findBySlug(slug).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
         found.setIsApproved(1);
+        articleRepository.save(found);
+    }
+
+    @Override
+    public void pinArticle(String slug) {
+        ArticleEntity found = articleRepository.findBySlug(slug).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
+        var tagList = found.getTagList();
+        tagList.add(ArticleTagRelationEntity.builder()
+                .article(found)
+                .tag(CommonConst.FEATURE_TAG)
+                .build());
+        articleRepository.save(found);
+    }
+
+    @Override
+    public void unpinArticle(String slug) {
+        ArticleEntity found = articleRepository.findBySlug(slug).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
+        var tagList = found.getTagList();
+        var tagNeedToBeDeleted = tagRepository.findAllByTag(CommonConst.FEATURE_TAG);
+        found.getTagList().removeAll(tagNeedToBeDeleted);
         articleRepository.save(found);
     }
 

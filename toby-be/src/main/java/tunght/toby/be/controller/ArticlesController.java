@@ -40,6 +40,7 @@ public class ArticlesController {
         return new ArticleDto.SingleArticle<>(articleService.getArticle(slug, authUserDetails));
     }
 
+    @Operation(summary = "Api author updates posts")
     @PutMapping("/{slug}")
     public ArticleDto.SingleArticle<ArticleDto> updateArticle(@PathVariable String slug, @Valid @RequestBody ArticleDto.SingleArticle<ArticleDto.Update> article, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
         return new ArticleDto.SingleArticle<>(articleService.updateArticle(slug, article.getArticle(), authUserDetails));
@@ -109,5 +110,17 @@ public class ArticlesController {
                               @RequestBody CommentDto.Update newComment,
                               @AuthenticationPrincipal AuthUserDetails authUserDetails) throws AccessDeniedException {
         commentService.update(slug, commentId, newComment, authUserDetails);
+    }
+
+    @Operation(summary = "Admin pin a post")
+    @PutMapping("/{slug}/pin")
+    public void pinArticle(@PathVariable String slug) {
+        articleService.pinArticle(slug);
+    }
+
+    @Operation(summary = "Admin unpin a post")
+    @PutMapping("/{slug}/unpin")
+    public void unpinArticle(@PathVariable String slug) {
+        articleService.unpinArticle(slug);
     }
 }
