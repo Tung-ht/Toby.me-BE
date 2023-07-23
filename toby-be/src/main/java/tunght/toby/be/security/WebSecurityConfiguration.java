@@ -40,6 +40,8 @@ public class WebSecurityConfiguration {
 
     final String[] adminEndpoints = {
             "/articles/approve/**",
+            "/articles/pin/**",
+            "/articles/unpin/**",
     };
 
     @Bean

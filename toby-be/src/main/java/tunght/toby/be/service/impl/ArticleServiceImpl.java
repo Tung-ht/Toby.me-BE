@@ -267,6 +267,9 @@ public class ArticleServiceImpl implements ArticleService {
     public void pinArticle(String slug) {
         ArticleEntity found = articleRepository.findBySlug(slug).orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND));
         var tagList = found.getTagList();
+        if (tagList.stream().anyMatch(t -> t.getTag().equals(CommonConst.FEATURE_TAG))) {
+            return;
+        }
         tagList.add(ArticleTagRelationEntity.builder()
                 .article(found)
                 .tag(CommonConst.FEATURE_TAG)

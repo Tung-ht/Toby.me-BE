@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 })
 public class TagController {
     private final TagService tagService;
-    private final AvailableTagRepository availableTagRepository;
 
     @Operation(summary = "Get tags sorted by popularity for home page or approving page",
     description = "Default is homepage, isApproved = 1; For approving page, isApproved = 0")
@@ -36,21 +35,14 @@ public class TagController {
     }
 
     @Operation(summary = "Get pinned tags (like: rule, notification,...) for main page")
+    @GetMapping("/pinned")
     public TagDto.TagList getPinnedTags() {
-        List<String> pinnedTags = availableTagRepository.getAllByIsPinned(1)
-                .stream()
-                .map(AvailableTag::getTagName)
-                .collect(Collectors.toList());
-        return TagDto.TagList.builder().tags(pinnedTags).build();
+        return TagDto.TagList.builder().tags(tagService.getPinnedTags()).build();
     }
 
     @Operation(summary = "Get tags list for drop-down selector when user creating articles")
     @GetMapping("/drop-down")
     public TagDto.TagList dropDownListOfTags() {
-        List<String> availableTags = availableTagRepository.findAll()
-                .stream()
-                .map(AvailableTag::getTagName)
-                .collect(Collectors.toList());
-        return TagDto.TagList.builder().tags(availableTags).build();
+        return TagDto.TagList.builder().tags(tagService.getDropDownTags()).build();
     }
 }

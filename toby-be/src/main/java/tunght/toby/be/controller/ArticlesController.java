@@ -113,13 +113,13 @@ public class ArticlesController {
     }
 
     @Operation(summary = "Admin pin a post")
-    @PutMapping("/{slug}/pin")
+    @PutMapping("/pin/{slug}")
     public void pinArticle(@PathVariable String slug) {
         articleService.pinArticle(slug);
     }
 
     @Operation(summary = "Admin unpin a post")
-    @PutMapping("/{slug}/unpin")
+    @PutMapping("/unpin/{slug}")
     public void unpinArticle(@PathVariable String slug) {
         articleService.unpinArticle(slug);
     }
