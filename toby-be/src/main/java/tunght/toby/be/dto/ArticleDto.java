@@ -54,4 +54,12 @@ public class ArticleDto {
         private String body;
         private List<String> tagList;
     }
+
+    @Getter
+    @Builder
+    public static class SearchRequest {
+        int limit;
+        int offset;
+        String contentSearchParam;
+    }
 }
