@@ -36,6 +36,7 @@ public class WebSecurityConfiguration {
             "/swagger-ui.html",
             "/images/**",
             "/tags/**",
+            "/articles/search/**",
     };
 
     final String[] adminEndpoints = {

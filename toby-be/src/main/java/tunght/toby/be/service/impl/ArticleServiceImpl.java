@@ -286,6 +286,28 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.save(found);
     }
 
+    @Transactional(readOnly = true)
+    @Override
+    public ArticleDto.MultipleArticle search(ArticleDto.SearchRequest searchRequest, AuthUserDetails authUserDetails) {
+        var pageable = PageRequest.of(searchRequest.getOffset(), searchRequest.getLimit());
+        var articlePageObject = articleRepository.findByBodyContainingIgnoreCaseAndIsApproved(searchRequest.getContentSearchParam(),1, pageable);
+
+        var dtos = articlePageObject.stream().map(article -> {
+            List<FavoriteEntity> favorites = article.getFavoriteList();
+            long favoriteCount = favorites.size();
+            boolean favorited = false;
+            if (authUserDetails != null) {
+                favorited = favorites.stream().anyMatch(favoriteEntity -> favoriteEntity.getUser().getId().equals(authUserDetails.getId()));
+            }
+            return convertEntityToDto(article, favorited, favoriteCount, authUserDetails);
+        }).collect(Collectors.toList());
+        return ArticleDto.MultipleArticle
+                .builder()
+                .articles(dtos)
+                .articlesCount((int) articlePageObject.getTotalElements())
+                .build();
+    }
+
     private ArticleDto convertEntityToDto(ArticleEntity entity, Boolean favorited, Long favoritesCount, AuthUserDetails authUserDetails) {
         ProfileDto author = profileService.getProfileByUserId(entity.getAuthor().getId(), authUserDetails);
         return ArticleDto.builder()

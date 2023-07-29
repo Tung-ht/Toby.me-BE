@@ -123,4 +123,9 @@ public class ArticlesController {
     public void unpinArticle(@PathVariable String slug) {
         articleService.unpinArticle(slug);
     }
+
+    @GetMapping("/search")
+    public ArticleDto.MultipleArticle search(@ModelAttribute ArticleDto.SearchRequest searchRequest, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
+        return articleService.search(searchRequest, authUserDetails);
+    }
 }

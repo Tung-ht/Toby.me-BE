@@ -49,4 +49,6 @@ public interface ArticleRepository extends JpaRepository<ArticleEntity, Long> {
             "WHERE f.user.username = :username AND a.isApproved = :isApproved " +
             "ORDER BY a.updatedAt DESC")
     Page<ArticleEntity> findByFavoritedUsername(@Param("username") String username, Integer isApproved, Pageable pageable);
+
+    Page<ArticleEntity> findByBodyContainingIgnoreCaseAndIsApproved(String contentSearchParam, Integer isApproved, Pageable pageable);
 }
