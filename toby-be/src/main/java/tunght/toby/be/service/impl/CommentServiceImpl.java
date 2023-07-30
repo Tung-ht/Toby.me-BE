@@ -34,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final ProfileService profileService;
 
-    @Value("${spring.kafka.like-post-noti-topic}")
+    @Value("${spring.kafka.comment-noti-topic}")
     private String commentTopic;
     private final KafkaTemplate<String, Object> notiKafkaTemplate;
 
@@ -46,6 +46,7 @@ public class CommentServiceImpl implements CommentService {
                 .body(comment.getBody())
                 .author(UserEntity.builder()
                         .id(authUserDetails.getId())
+                        .username(authUserDetails.getUsername())
                         .build())
                 .article(articleEntity)
                 .build();
@@ -122,7 +123,7 @@ public class CommentServiceImpl implements CommentService {
                 .toUserId(commentEntity.getArticle().getAuthor().getId().toString())
                 .commentId(commentEntity.getId().toString())
                 .postId(commentEntity.getArticle().getId().toString())
-                .message(commentEntity.getBody())
+                .message(ENotifications.getNotificationMessage(ENotifications.COMMENT, commentEntity.getAuthor().getUsername()))
                 .isRead(false)
                 .build();
     }

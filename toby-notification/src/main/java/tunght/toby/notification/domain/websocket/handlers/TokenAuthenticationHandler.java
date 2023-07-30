@@ -42,7 +42,8 @@ public class TokenAuthenticationHandler extends BaseClientRequestHandler {
         Claim jwtIdClaim = jwt2.getClaim("jti");
         Claim keySidClaim = jwt2.getClaim("iss");
         Claim expClaim = jwt2.getClaim("exp");
-        Claim userIdClaim = jwt2.getClaim("user_id");
+//        Claim userIdClaim = jwt2.getClaim("user_id");
+        Claim userIdClaim = jwt2.getClaim("sub");
 
         if (userIdClaim.isNull()) {
             logger.info("jwtIdClaim == null || keySidClaim == null || expClaim == null || userIdClaim == " + userIdClaim);

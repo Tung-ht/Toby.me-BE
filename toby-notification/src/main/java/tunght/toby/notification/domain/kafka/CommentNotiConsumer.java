@@ -24,7 +24,7 @@ public class CommentNotiConsumer {
 
     private final NotificationRepository notificationRepository;
 
-    @KafkaListener(topics = "${spring.kafka.like-post-noti-topic}", groupId = "${spring.kafka.group-noti-id}", containerFactory = "notiListenerContainerFactory")
+    @KafkaListener(topics = "${spring.kafka.comment-noti-topic}", groupId = "${spring.kafka.group-noti-id}", containerFactory = "notiListenerContainerFactory")
     public void receiveMessage(@Payload String notification) {
         logger.info("receive payload: {}", notification);
         NotificationDto notificationDto = new Gson().fromJson(notification, NotificationDto.class);

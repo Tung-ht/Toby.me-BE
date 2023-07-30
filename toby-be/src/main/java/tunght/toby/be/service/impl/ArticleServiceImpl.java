@@ -1,13 +1,16 @@
 package tunght.toby.be.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tunght.toby.be.consts.CommonConst;
 import tunght.toby.be.dto.ArticleDto;
+import tunght.toby.be.dto.NotificationDto;
 import tunght.toby.be.dto.ProfileDto;
 import tunght.toby.be.dto.model.ArticleQueryParam;
 import tunght.toby.be.dto.model.FeedParams;
@@ -20,6 +23,7 @@ import tunght.toby.be.service.ArticleService;
 import tunght.toby.be.service.ProfileService;
 import tunght.toby.common.entity.BaseEntity;
 import tunght.toby.common.entity.UserEntity;
+import tunght.toby.common.enums.ENotifications;
 import tunght.toby.common.enums.ERole;
 import tunght.toby.common.enums.EStatus;
 import tunght.toby.common.exception.AppException;
@@ -40,6 +44,10 @@ public class ArticleServiceImpl implements ArticleService {
     private final UserRepository userRepository;
     private final ProfileService profileService;
     private final TagRepository tagRepository;
+
+    @Value("${spring.kafka.like-post-noti-topic}")
+    private String likePostTopic;
+    private final KafkaTemplate<String, Object> notiKafkaTemplate;
 
     @Transactional
     @Override
@@ -154,8 +162,22 @@ public class ArticleServiceImpl implements ArticleService {
 
         FavoriteEntity favorite = FavoriteEntity.builder()
                 .article(found)
-                .user(UserEntity.builder().id(authUserDetails.getId()).build())
+                .user(UserEntity.builder()
+                        .id(authUserDetails.getId())
+                        .username(authUserDetails.getUsername())
+                        .build())
                 .build();
+
+        NotificationDto notificationDto = NotificationDto.builder()
+                .type(ENotifications.LIKE_POST)
+                .fromUserId(favorite.getUser().getId().toString())
+                .toUserId(found.getAuthor().getId().toString())
+                .postId(found.getId().toString())
+                .message(ENotifications.getNotificationMessage(ENotifications.LIKE_POST, favorite.getUser().getUsername()))
+                .isRead(false)
+                .build();
+        notiKafkaTemplate.send(likePostTopic, notificationDto);
+
         favoriteRepository.save(favorite);
 
         return getArticle(slug, authUserDetails);
