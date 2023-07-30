@@ -41,7 +41,7 @@ public class LikePostNotiConsumer {
         if (user == null) {
             logger.info("user {} not online", notificationDto.getToUserId());
         } else {
-            IPacket packet = new UserPacket(CmdDefs.COMMENT_NOTI_CMD);
+            IPacket packet = new UserPacket(CmdDefs.LIKE_POST_NOTI_CMD);
             packet.addField("from_user", notificationEntity.getFromUserId());
             packet.addField("to_user", notificationEntity.getToUserId());
             packet.addField("message", notificationEntity.getMessage());
