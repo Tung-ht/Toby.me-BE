@@ -1,9 +1,12 @@
 package tunght.toby.be.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tunght.toby.be.dto.CommentDto;
+import tunght.toby.be.dto.NotificationDto;
 import tunght.toby.be.dto.ProfileDto;
 import tunght.toby.be.entity.ArticleEntity;
 import tunght.toby.be.entity.CommentEntity;
@@ -13,6 +16,7 @@ import tunght.toby.be.service.CommentService;
 import tunght.toby.be.service.ProfileService;
 import tunght.toby.common.entity.BaseEntity;
 import tunght.toby.common.entity.UserEntity;
+import tunght.toby.common.enums.ENotifications;
 import tunght.toby.common.enums.ERole;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
@@ -30,6 +34,10 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final ProfileService profileService;
 
+    @Value("${spring.kafka.comment-noti-topic}")
+    private String commentTopic;
+    private final KafkaTemplate<String, Object> notiKafkaTemplate;
+
     @Transactional
     @Override
     public CommentDto addCommentsToAnArticle(String slug, CommentDto comment, AuthUserDetails authUserDetails) {
@@ -38,10 +46,14 @@ public class CommentServiceImpl implements CommentService {
                 .body(comment.getBody())
                 .author(UserEntity.builder()
                         .id(authUserDetails.getId())
+                        .username(authUserDetails.getUsername())
                         .build())
                 .article(articleEntity)
                 .build();
         commentRepository.save(commentEntity);
+
+        NotificationDto notificationDto = createNotiDto(commentEntity);
+        notiKafkaTemplate.send(commentTopic, notificationDto);
 
         return convertToDTO(authUserDetails, commentEntity);
     }
@@ -103,4 +115,17 @@ public class CommentServiceImpl implements CommentService {
                 .author(author)
                 .build();
     }
+
+    private NotificationDto createNotiDto(CommentEntity commentEntity) {
+        return NotificationDto.builder()
+                .type(ENotifications.COMMENT)
+                .fromUserId(commentEntity.getAuthor().getId().toString())
+                .toUserId(commentEntity.getArticle().getAuthor().getId().toString())
+                .commentId(commentEntity.getId().toString())
+                .postId(commentEntity.getArticle().getId().toString())
+                .message(ENotifications.getNotificationMessage(ENotifications.COMMENT, commentEntity.getAuthor().getUsername()))
+                .isRead(false)
+                .build();
+    }
+
 }

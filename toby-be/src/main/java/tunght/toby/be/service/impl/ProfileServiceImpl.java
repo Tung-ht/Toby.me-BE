@@ -1,14 +1,18 @@
 package tunght.toby.be.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tunght.toby.be.dto.NotificationDto;
 import tunght.toby.be.dto.ProfileDto;
 import tunght.toby.be.entity.FollowEntity;
 import tunght.toby.be.repository.FollowRepository;
 import tunght.toby.be.repository.UserRepository;
 import tunght.toby.be.service.ProfileService;
 import tunght.toby.common.entity.UserEntity;
+import tunght.toby.common.enums.ENotifications;
 import tunght.toby.common.enums.EStatus;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
@@ -19,6 +23,10 @@ import tunght.toby.common.security.AuthUserDetails;
 public class ProfileServiceImpl implements ProfileService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
+
+    @Value("${spring.kafka.follow-noti-topic}")
+    private String followTopic;
+    private final KafkaTemplate<String, Object> notiKafkaTemplate;
 
     @Override
     public ProfileDto getProfile(String name, AuthUserDetails authUserDetails) {
@@ -40,13 +48,25 @@ public class ProfileServiceImpl implements ProfileService {
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new AppException(Error.USER_NOT_FOUND));
-        UserEntity follower = UserEntity.builder().id(authUserDetails.getId()).build(); // myself
+        UserEntity follower = UserEntity.builder()
+                .id(authUserDetails.getId())
+                .username(authUserDetails.getUsername())
+                .build(); // myself
 
         followRepository.findByFolloweeIdAndFollowerId(followee.getId(), follower.getId())
                 .ifPresent(follow -> {throw new AppException(Error.ALREADY_FOLLOWED_USER);});
 
         FollowEntity follow =  FollowEntity.builder().followee(followee).follower(follower).build();
         followRepository.save(follow);
+
+        NotificationDto notificationDto = NotificationDto.builder()
+                .type(ENotifications.FOLLOW)
+                .fromUserId(follower.getId().toString())
+                .toUserId(followee.getId().toString())
+                .message(ENotifications.getNotificationMessage(ENotifications.FOLLOW, follower.getUsername()))
+                .isRead(false)
+                .build();
+        notiKafkaTemplate.send(followTopic, notificationDto);
 
         return convertToProfile(followee, true);
     }
