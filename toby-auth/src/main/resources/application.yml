@@ -19,7 +19,8 @@ spring:
 logging:
   file:
     name: logs/toby-auth.log
-    max-size: 10MB
+#    max-size: 10MB
+    total-size-cap: 10MB
   pattern:
     file: "%d [%t] %-5level %logger{36} - %msg%n"
 #    console:

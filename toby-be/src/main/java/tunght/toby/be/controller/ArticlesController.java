@@ -125,7 +125,7 @@ public class ArticlesController {
     }
 
     @GetMapping("/search")
-    public ArticleDto.MultipleArticle search(@ModelAttribute ArticleDto.SearchRequest searchRequest, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
+    public ArticleDto.MultipleArticle search(@ModelAttribute @Valid ArticleDto.SearchRequest searchRequest, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
         return articleService.search(searchRequest, authUserDetails);
     }
 }
