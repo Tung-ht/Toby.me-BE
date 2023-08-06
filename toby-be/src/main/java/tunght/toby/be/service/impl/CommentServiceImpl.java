@@ -12,6 +12,7 @@ import tunght.toby.be.entity.ArticleEntity;
 import tunght.toby.be.entity.CommentEntity;
 import tunght.toby.be.repository.ArticleRepository;
 import tunght.toby.be.repository.CommentRepository;
+import tunght.toby.be.repository.UserRepository;
 import tunght.toby.be.service.CommentService;
 import tunght.toby.be.service.ProfileService;
 import tunght.toby.common.entity.BaseEntity;
@@ -21,8 +22,11 @@ import tunght.toby.common.enums.ERole;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.security.AuthUserDetails;
+import tunght.toby.common.utils.JsonConverter;
 
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,8 +56,19 @@ public class CommentServiceImpl implements CommentService {
                 .build();
         commentRepository.save(commentEntity);
 
-        NotificationDto notificationDto = createNotiDto(commentEntity);
-        notiKafkaTemplate.send(commentTopic, notificationDto);
+        String username = profileService.getUsernameById(authUserDetails.getId());
+
+        NotificationDto notificationDto = NotificationDto.builder()
+                .type(ENotifications.COMMENT)
+                .fromUserId(commentEntity.getAuthor().getId().toString())
+                .toUserId(commentEntity.getArticle().getAuthor().getId().toString())
+                .commentId(commentEntity.getId().toString())
+                .postId(commentEntity.getArticle().getId().toString())
+                .message(ENotifications.getNotificationMessage(ENotifications.COMMENT, username))
+                .isRead(false)
+                .build();
+
+        notiKafkaTemplate.send(commentTopic, JsonConverter.serializeObject(notificationDto));
 
         return convertToDTO(authUserDetails, commentEntity);
     }

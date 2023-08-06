@@ -28,7 +28,7 @@ public class User implements IUser {
     public void addConnection(IClientConnection connection) {
         for (IClientConnection conn : connections) {
             if (conn.getId() == connection.getId()) {
-                LOGGER.info("user: " + userId + " da co connection nay: " + conn.getId());
+                LOGGER.info("user: " + userId + " already has this connection: " + conn.getId());
                 return;
             }
         }
@@ -69,7 +69,7 @@ public class User implements IUser {
     }
 
     @Override
-    public void sendMessage(IPacket packet) {
+    public void sendMessageTo(IPacket packet) {
         if (connections.isEmpty()) {
             return;
         }

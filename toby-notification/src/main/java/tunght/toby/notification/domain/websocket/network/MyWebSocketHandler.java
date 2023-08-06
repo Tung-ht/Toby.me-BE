@@ -30,13 +30,13 @@ public class MyWebSocketHandler extends TextWebSocketHandler {
         if (connection == null) {
             return;
         }
-        logger.info("connect close: " + connection.getUser().getUserId());
+        logger.info("Websocket connection closed: userId " + connection.getUser().getUserId());
         socketClientManger.onDisconnect(connection, status.getCode(), status.getReason());
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-
+        logger.info("Websocket connection established");
         IClientConnection connection = new WebsocketClientConnection(session);
         session.getAttributes().put("connection", connection);
 

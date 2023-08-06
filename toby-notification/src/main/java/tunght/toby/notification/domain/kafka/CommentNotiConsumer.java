@@ -1,12 +1,12 @@
 package tunght.toby.notification.domain.kafka;
 
-import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import tunght.toby.common.utils.JsonConverter;
 import tunght.toby.notification.config.CmdDefs;
 import tunght.toby.notification.domain.websocket.manager.UserManager;
 import tunght.toby.notification.domain.websocket.network.IPacket;
@@ -27,15 +27,15 @@ public class CommentNotiConsumer {
     @KafkaListener(topics = "${spring.kafka.comment-noti-topic}", groupId = "${spring.kafka.group-noti-id}", containerFactory = "notiListenerContainerFactory")
     public void receiveMessage(@Payload String notification) {
         logger.info("receive payload: {}", notification);
-        NotificationDto notificationDto = new Gson().fromJson(notification, NotificationDto.class);
+        NotificationDto notificationDto = JsonConverter.deserializeObject(notification, NotificationDto.class);
 
         NotificationEntity notificationEntity = NotificationEntity.builder()
                 .type(notificationDto.getType())
+                .postId(notificationDto.getPostId())
+                .commentId(notificationDto.getCommentId())
                 .fromUserId(notificationDto.getFromUserId())
                 .toUserId(notificationDto.getToUserId())
                 .message(notificationDto.getMessage())
-                .commentId(notificationDto.getCommentId())
-                .postId(notificationDto.getPostId())
                 .isRead(false)
                 .build();
 
@@ -44,10 +44,7 @@ public class CommentNotiConsumer {
             logger.info("user {} not online", notificationDto.getToUserId());
         } else {
             IPacket packet = new UserPacket(CmdDefs.COMMENT_NOTI_CMD);
-            packet.addField("from_user", notificationEntity.getFromUserId());
-            packet.addField("to_user", notificationEntity.getToUserId());
-            packet.addField("message", notificationEntity.getMessage());
-            user.sendMessage(packet);
+            NotificationPackageSender.sendDataPackage(notificationEntity, user, packet);
         }
 
         notificationRepository.save(notificationEntity);

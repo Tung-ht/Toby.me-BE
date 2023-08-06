@@ -35,6 +35,7 @@ public class WebSecurityConfiguration {
             "/swagger-ui.html",
             "/images/**",
             "/users/**",
+            "/ws-endpoint",
     };
 
     @Bean

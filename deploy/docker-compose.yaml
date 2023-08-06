@@ -1,23 +1,23 @@
 version: "3"
 services:
-#  mysql:
-#    image: mysql:8.0.28
-#    container_name: mysql
-#    ports:
-#      - "3307:3306"
-#    environment:
-#      - MYSQL_ROOT_PASSWORD=lovecan148
-#    volumes:
-#      - mysql_data:/var/lib/mysql
-#
-#  redis:
-#    image: redis:6.2.4-alpine
-#    container_name: redis
-#    ports:
-#      - "6379:6379"
-#    volumes:
-#      - redis_data:/data
-#    command: redis-server --requirepass 123456a@
+  mysql:
+    image: mysql:8.0.28
+    container_name: mysql
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=lovecan148
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:6.2.4-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass 123456a@
 
   zookeeper:
     container_name: zookeeper
@@ -25,16 +25,13 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - 9181:2181
 
   kafka0:
     container_name: kafka0
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
-    ports:
-      - 9092:29092
+#    spring kafka config connect to port 29092
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -43,6 +40,6 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-#volumes:
-#  redis_data:
-#  mysql_data:
+volumes:
+  redis_data:
+  mysql_data:

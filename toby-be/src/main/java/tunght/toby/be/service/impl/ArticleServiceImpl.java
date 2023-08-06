@@ -1,5 +1,6 @@
 package tunght.toby.be.service.impl;
 
+import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -29,8 +30,10 @@ import tunght.toby.common.enums.EStatus;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.security.AuthUserDetails;
+import tunght.toby.common.utils.JsonConverter;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -167,18 +170,21 @@ public class ArticleServiceImpl implements ArticleService {
                         .username(authUserDetails.getUsername())
                         .build())
                 .build();
+        favoriteRepository.save(favorite);
+
+        String username = profileService.getUsernameById(authUserDetails.getId());
 
         NotificationDto notificationDto = NotificationDto.builder()
                 .type(ENotifications.LIKE_POST)
                 .fromUserId(favorite.getUser().getId().toString())
                 .toUserId(found.getAuthor().getId().toString())
                 .postId(found.getId().toString())
-                .message(ENotifications.getNotificationMessage(ENotifications.LIKE_POST, favorite.getUser().getUsername()))
+                .message(ENotifications.getNotificationMessage(ENotifications.LIKE_POST, username))
                 .isRead(false)
                 .build();
-        notiKafkaTemplate.send(likePostTopic, notificationDto);
 
-        favoriteRepository.save(favorite);
+        notiKafkaTemplate.send(likePostTopic, JsonConverter.serializeObject(notificationDto));
+
 
         return getArticle(slug, authUserDetails);
     }

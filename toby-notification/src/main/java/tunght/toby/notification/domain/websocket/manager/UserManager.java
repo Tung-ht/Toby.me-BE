@@ -1,5 +1,6 @@
 package tunght.toby.notification.domain.websocket.manager;
 
+import lombok.extern.slf4j.Slf4j;
 import tunght.toby.notification.domain.websocket.network.IClientConnection;
 import tunght.toby.notification.domain.websocket.network.IUser;
 import tunght.toby.notification.domain.websocket.network.User;
@@ -8,6 +9,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public class UserManager {
 
     private static final Map<String, IUser> USERS = new ConcurrentHashMap<>();
@@ -33,6 +35,7 @@ public class UserManager {
         if (user == null) {
             user = new User(userId);
             addUser(user);
+            log.info("User with id {} is online", userId);
         }
 
         connection.setUser(user);

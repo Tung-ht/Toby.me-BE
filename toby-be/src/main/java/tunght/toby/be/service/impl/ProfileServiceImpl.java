@@ -17,6 +17,10 @@ import tunght.toby.common.enums.EStatus;
 import tunght.toby.common.exception.AppException;
 import tunght.toby.common.exception.Error;
 import tunght.toby.common.security.AuthUserDetails;
+import tunght.toby.common.utils.JsonConverter;
+
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -59,14 +63,16 @@ public class ProfileServiceImpl implements ProfileService {
         FollowEntity follow =  FollowEntity.builder().followee(followee).follower(follower).build();
         followRepository.save(follow);
 
+        String username = getUsernameById(authUserDetails.getId());
+
         NotificationDto notificationDto = NotificationDto.builder()
                 .type(ENotifications.FOLLOW)
                 .fromUserId(follower.getId().toString())
                 .toUserId(followee.getId().toString())
-                .message(ENotifications.getNotificationMessage(ENotifications.FOLLOW, follower.getUsername()))
+                .message(ENotifications.getNotificationMessage(ENotifications.FOLLOW, username))
                 .isRead(false)
                 .build();
-        notiKafkaTemplate.send(followTopic, notificationDto);
+        notiKafkaTemplate.send(followTopic, JsonConverter.serializeObject(notificationDto));
 
         return convertToProfile(followee, true);
     }

@@ -18,6 +18,6 @@ public interface IUser {
 
     IUserClient getUserClient(String sessionId);
 
-    void sendMessage(IPacket packet);
+    void sendMessageTo(IPacket packet);
 
 }
