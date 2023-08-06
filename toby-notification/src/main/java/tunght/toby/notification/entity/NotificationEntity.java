@@ -14,7 +14,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "notification")
+@Table(name = "notifications")
 public class NotificationEntity extends BaseEntity {
 
     @Column(nullable = false)

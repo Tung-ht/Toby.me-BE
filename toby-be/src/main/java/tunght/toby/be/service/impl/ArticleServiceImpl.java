@@ -330,6 +330,13 @@ public class ArticleServiceImpl implements ArticleService {
                 .build();
     }
 
+    @Override
+    public String getSlugById(Long id) {
+        return articleRepository.findById(id)
+                .orElseThrow(() -> new AppException(Error.ARTICLE_NOT_FOUND))
+                .getSlug();
+    }
+
     private ArticleDto convertEntityToDto(ArticleEntity entity, Boolean favorited, Long favoritesCount, AuthUserDetails authUserDetails) {
         ProfileDto author = profileService.getProfileByUserId(entity.getAuthor().getId(), authUserDetails);
         return ArticleDto.builder()

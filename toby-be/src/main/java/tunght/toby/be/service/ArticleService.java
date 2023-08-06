@@ -33,4 +33,6 @@ public interface ArticleService {
     void unpinArticle(String slug);
 
     ArticleDto.MultipleArticle search(ArticleDto.SearchRequest searchRequest, AuthUserDetails authUserDetails);
+
+    String getSlugById(Long id);
 }

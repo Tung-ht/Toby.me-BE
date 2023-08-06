@@ -128,4 +128,10 @@ public class ArticlesController {
     public ArticleDto.MultipleArticle search(@ModelAttribute @Valid ArticleDto.SearchRequest searchRequest, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
         return articleService.search(searchRequest, authUserDetails);
     }
+
+    @Operation(summary = "Get slug by id")
+    @GetMapping("/slug")
+    public String getSlugById(@RequestParam Long id) {
+        return articleService.getSlugById(id);
+    }
 }

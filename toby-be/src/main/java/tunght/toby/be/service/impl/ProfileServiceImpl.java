@@ -97,6 +97,13 @@ public class ProfileServiceImpl implements ProfileService {
         return convertToProfile(user, following);
     }
 
+    @Override
+    public String getUsernameById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(Error.USER_NOT_FOUND))
+                .getUsername();
+    }
+
     private ProfileDto convertToProfile(UserEntity user, Boolean following) {
         return ProfileDto.builder()
                 .username(user.getUsername())

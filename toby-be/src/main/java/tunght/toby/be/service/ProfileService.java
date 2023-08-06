@@ -11,4 +11,6 @@ public interface ProfileService {
     ProfileDto unfollowUser(final String name, final AuthUserDetails authUserDetails);
 
     ProfileDto getProfileByUserId(Long userId, AuthUserDetails authUserDetails);
+
+    String getUsernameById(Long userId);
 }

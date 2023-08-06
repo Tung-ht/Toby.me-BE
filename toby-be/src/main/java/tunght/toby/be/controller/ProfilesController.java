@@ -1,5 +1,6 @@
 package tunght.toby.be.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import tunght.toby.be.dto.ProfileDto;
@@ -33,5 +34,11 @@ public class ProfilesController {
     @DeleteMapping("/{username}/follow")
     public ProfileDto.Single unfollowUser(@PathVariable("username") String name, @AuthenticationPrincipal AuthUserDetails authUserDetails) {
         return new ProfileDto.Single(profileService.unfollowUser(name, authUserDetails));
+    }
+
+    @Operation(summary = "Get username by userId")
+    @GetMapping("/username")
+    public String getUsernameById(@RequestParam Long id) {
+        return profileService.getUsernameById(id);
     }
 }
