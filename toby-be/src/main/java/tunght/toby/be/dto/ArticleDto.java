@@ -3,6 +3,7 @@ package tunght.toby.be.dto;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -13,12 +14,13 @@ import java.util.List;
 public class ArticleDto {
     private String slug;
 
-    @NotBlank(message = "bạn chưa điền tiêu đề")
+    @NotBlank(message = "Bạn chưa điền tiêu đề")
     private String title;
-    @NotBlank(message = "bạn chưa điền mô tả")
+    @NotBlank(message = "Bạn chưa điền mô tả")
     private String description;
-    @NotBlank(message = "bạn chưa điền nội dung")
+    @NotBlank(message = "Bạn chưa điền nội dung")
     private String body;
+    @NotEmpty(message = "Bài viết phải được gắn thẻ")
     private List<String> tagList;
 
     private ZonedDateTime createdAt;

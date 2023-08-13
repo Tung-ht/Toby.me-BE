@@ -30,16 +30,16 @@ public class UserDto {
     @JsonTypeName("user")
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
     public static class Registration {
-        @NotBlank(message = "tên hiển thị không được để trống")
-        @Pattern(regexp = "[\\w\\d]{1,30}", message = "tên hiển thị chỉ được bao gồm chữ cái hoặc kí tự số, ít nhất 1 kí tự số")
+        @NotBlank(message = "Tên hiển thị không được để trống")
+        @Pattern(regexp = "[\\w\\d]{1,30}", message = "Tên hiển thị chỉ được bao gồm chữ cái, kí tự số hoặc gạch dưới, ít nhất 1 kí tự số")
         private String username;
 
-        @NotBlank(message = "email không được để trống")
-        @Email(message = "email không đúng định dạng")
+        @NotBlank(message = "Email không được để trống")
+        @Email(message = "Email không đúng định dạng")
         private String email;
 
-        @NotBlank(message = "mật khẩu không được để trống")
-        @Size(min = 8, max = 32, message = "mật khẩu phải từ 8-32 kí tự")
+        @NotBlank(message = "Mật khẩu không được để trống")
+        @Size(min = 8, max = 32, message = "Mật khẩu phải từ 8-32 kí tự")
         private String password;
     }
 
@@ -58,12 +58,12 @@ public class UserDto {
     @JsonTypeName("user")
     @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
     public static class Login {
-        @NotBlank(message = "email không được để trống")
-        @Email(message = "email không đúng định dạng")
+        @NotBlank(message = "Email không được để trống")
+        @Email(message = "Email không đúng định dạng")
         private String email;
 
-        @NotBlank(message = "mật khẩu không được để trống")
-        @Size(min = 8, max = 32, message = "mật khẩu phải từ 8-32 kí tự")
+        @NotBlank(message = "Mật khẩu không được để trống")
+        @Size(min = 8, max = 32, message = "Mật khẩu phải từ 8-32 kí tự")
         private String password;
     }
 
@@ -75,8 +75,8 @@ public class UserDto {
     public static class Update {
         private Long id;
         private String email;
-        @NotBlank(message = "tên hiển thị không được để trống")
-        @Pattern(regexp = "[\\w\\d]{1,30}", message = "tên hiển thị chỉ được bao gồm chữ cái hoặc kí tự số, ít nhất 1 kí tự số")
+        @NotBlank(message = "Tên hiển thị không được để trống")
+        @Pattern(regexp = "[\\w\\d]{1,30}", message = "Tên hiển thị chỉ được bao gồm chữ cái, kí tự số hoặc gạch dưới, ít nhất 1 kí tự số")
         private String username;
         private String bio;
         private String image;
