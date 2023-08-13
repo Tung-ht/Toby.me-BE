@@ -51,9 +51,13 @@ public class ArticleDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Update {
+        @NotBlank(message = "Bạn chưa điền tiêu đề")
         private String title;
+        @NotBlank(message = "Bạn chưa điền mô tả")
         private String description;
+        @NotBlank(message = "Bạn chưa điền nội dung")
         private String body;
+        @NotEmpty(message = "Bài viết phải được gắn thẻ")
         private List<String> tagList;
     }
 
