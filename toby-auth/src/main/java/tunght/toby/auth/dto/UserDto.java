@@ -17,6 +17,7 @@ import java.util.List;
 @JsonTypeName("user")
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
 public class UserDto {
+    private Long id;
     private String email;
     private String username;
     private String bio;

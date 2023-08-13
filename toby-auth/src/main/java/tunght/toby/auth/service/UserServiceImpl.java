@@ -82,6 +82,7 @@ public class UserServiceImpl implements UserService {
 
     private UserDto convertEntityToDto(UserEntity userEntity) {
         return UserDto.builder()
+                .id(userEntity.getId())
                 .username(userEntity.getUsername())
                 .bio(userEntity.getBio())
                 .email(userEntity.getEmail())

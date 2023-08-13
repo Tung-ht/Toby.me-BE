@@ -28,6 +28,7 @@ logging:
     org.springframework.web: ERROR
     org.springframework.security: DEBUG
     org.hibernate: ERROR
+    org.springframework.web.socket.*: DEBUG
     tunght.toby.*: DEBUG
 
 toby:
