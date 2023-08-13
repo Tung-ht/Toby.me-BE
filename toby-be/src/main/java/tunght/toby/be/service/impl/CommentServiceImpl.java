@@ -12,7 +12,6 @@ import tunght.toby.be.entity.ArticleEntity;
 import tunght.toby.be.entity.CommentEntity;
 import tunght.toby.be.repository.ArticleRepository;
 import tunght.toby.be.repository.CommentRepository;
-import tunght.toby.be.repository.UserRepository;
 import tunght.toby.be.service.CommentService;
 import tunght.toby.be.service.ProfileService;
 import tunght.toby.common.entity.BaseEntity;
@@ -25,8 +24,6 @@ import tunght.toby.common.security.AuthUserDetails;
 import tunght.toby.common.utils.JsonConverter;
 
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 

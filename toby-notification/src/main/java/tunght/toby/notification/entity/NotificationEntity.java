@@ -1,6 +1,5 @@
 package tunght.toby.notification.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +7,6 @@ import tunght.toby.common.entity.BaseEntity;
 import tunght.toby.common.enums.ENotifications;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Getter

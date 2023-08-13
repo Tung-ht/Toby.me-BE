@@ -1,14 +1,10 @@
 package tunght.toby.be.dto;
 
-import com.google.gson.annotations.Expose;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import tunght.toby.common.enums.ENotifications;
-
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 
 @Getter
 @Setter
