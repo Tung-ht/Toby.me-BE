@@ -1,5 +1,5 @@
 ﻿# Toby.me-BE
-![Software system architecture diagram]([https://myoctocat.com/assets/images/base-octocat.svg](https://drive.google.com/drive/my-drive))
+![Software system architecture diagram](https://drive.google.com/drive/my-drive)
 
 
 The components in the system include:
