@@ -3,6 +3,7 @@
 
 
 The components in the system include:
+
 • Nginx - was employed as a proxy server to forward external requests to internal services, effectively concealing the underlying components of the system. Additionally, Nginx served as a load balancer, evenly distributing incoming requests among multiple service instances, safeguarding the system against overloading.
 
 • toby-auth service - processes authorization, handles registration and login, managing user information, and retrieving user information requests. When a user logins, toby-auth handles this request, verifies login information. Then, this service generates access token, and saves it to Redis. In this project, a decentralized authentication model is used, where each service independently authenticates requests by checking with the access token stored in Redis by the toby-auth service. This approach reduces dependencies between services and allows them to operate independently when processing requests.
