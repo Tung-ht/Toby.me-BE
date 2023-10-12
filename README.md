@@ -1,6 +1,5 @@
 ﻿# Toby.me-BE
-![Software system architecture diagram](https://drive.google.com/drive/my-drive)
-
+![Software system architecture diagram](https://github.com/Tung-ht/Toby.me-BE/assets/71523468/defd26dd-eaf7-4ac6-9c05-870e7e147029)
 
 The components in the system include:
 
